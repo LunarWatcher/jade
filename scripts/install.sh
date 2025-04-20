@@ -44,3 +44,10 @@ sudo -u postgres psql -c "CREATE DATABASE jade;"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE jade TO jade;"
 set -e
 # }}}
+# Init venv {{{
+python3 -m venv env
+source ./bin/env/activate 
+
+pip3 install -r requirements.txt
+
+# }}}
