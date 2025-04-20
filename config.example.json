@@ -1,0 +1,6 @@
+{
+    "port": 6969,
+
+    "dbHost": "localhost",
+    "dbPassword": "password"
+}
