@@ -1,8 +1,50 @@
 :root {
+    --jade-theme-jade: #00A86B;
+    --jade-theme-pink: #D30060;
+    --jade-theme-orange: #FBA700;
+
+    --jade-theme-font: 400 1rem Ubuntu, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+        "Segoe UI Emoji", "Segoe UI Symbol";
+
+    --jade-monospace-font: monospace;
+    
+    /* Default theme */
+    --theme-font: var(--jade-theme-font);
+
+    --primary-colour: var(--jade-theme-jade);
+    --secondary-colour: var(--jade-theme-pink);
+    --tertiary-colour: var(--jade-theme-orange);
+
+    --regular-background-colour: white;
+    --regular-text-colour: black;
+
+    /* Default colour mixing */
+    
+    --background-primary: var(--primary-colour);
+    --foreground-primary: black;
+    --background-primary-active: color-mix(in srgb, var(--primary-colour), black 10%);
+
+    --background-secondary: var(--secondary-colour);
+    --foreground-secondary: white;
+    --background-secondary-active: color-mix(in srgb, var(--secondary-colour), black 10%);
+
+    --background-tertiary: var(--tertiary-colour);
+    --foreground-tertiary: black;
+    --background-tertiary-active: color-mix(in srgb, var(--tertiary-colour), black 10%);
+
+    --shadow-colour: var(--background-primary);
+    --coloured-shadow: 2px 2px 4px var(--shadow-colour);
 
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
+    color: var(--regular-text-colour);
+    background: var(--regular-background-colour);
+    font: var(--theme-font);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -12,4 +54,54 @@ body {
 main {
     flex: 1 0 auto;
     display: flex;
+}
+
+.flex-vertical {
+    display: flex;
+    flex: 1 0 100%;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.flex-vertical > * {
+    width: 100%;
+}
+
+.flex-horizontal {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: row;
+}
+
+.center-items {
+    align-items: center;
+}
+
+#login-form {
+    max-width: 500px;
+}
+
+form input {
+    padding: 8px;
+}
+
+button, input[type="submit"] {
+    background-color: var(--background-primary);
+    color: var(--foreground-primary);
+
+    border: none;
+    border-radius: 0px;
+    transition: 250ms ease-in;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: var(--background-primary-active);
+    box-shadow: var(--coloured-shadow);
+    cursor: pointer;
+
+}
+
+.boxed-container {
+    padding: 8px;
+    max-width: 500px;
 }

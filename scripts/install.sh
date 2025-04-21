@@ -4,6 +4,12 @@ set -x
 set -e 
 
 cd /opt 
+
+if [ -d /opt/jade ]; then
+    echo "/opt/jade already exists. Do not rerun the installer to update. Use ./scripts/update.sh instead."
+    return -69
+fi
+
 sudo mkdir jade
 sudo chown olivia jade
 
