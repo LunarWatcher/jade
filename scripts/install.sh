@@ -38,7 +38,7 @@ fi
 # For non-interactive use, check for the PSQL_PASSWORD env variable before prompting
 if [[ "$PSQL_PASSWORD" == "" ]];
 then
-    read -s -p "Postgres password for user jade: " PSQL_PASSWORD
+    read -s -p "Postgres password for [postgres] user jade: " PSQL_PASSWORD
     echo
 fi
 

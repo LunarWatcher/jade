@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(jade)
 
+option (JADE_SANITISE "Whether or not to enable -fsanitize=undefined" OFF)
+
 set (CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -27,7 +29,7 @@ FetchContent_Declare(pqxx
 )
 FetchContent_Declare(crowcpp
     GIT_REPOSITORY https://github.com/CrowCpp/Crow
-    GIT_TAG v1.2.1.2
+    #GIT_TAG v1.2.1.2
 )
 
 FetchContent_Declare(cpr
@@ -59,9 +61,15 @@ FetchContent_MakeAvailable(crowcpp
     cli11
 )
 
+find_package(OpenSSL REQUIRED)
+
 add_definitions(-DCROW_ENFORCE_WS_SPEC=1)
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_definitions(-DJADE_DEBUG=1)
+endif()
+
+if (JADE_SANITISE)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
 endif()
 
 # Set up versioning {{{
@@ -81,7 +89,7 @@ add_definitions(-DJADE_VERSION="${JADE_VERSION}")
 # }}}
 
 add_subdirectory(src)
-#add_subdirectory(tests)
+#add_subdirectory(tests EXCLUDE_FROM_ALL)
 
 add_custom_target(run
     COMMAND jade

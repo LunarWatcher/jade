@@ -10,14 +10,17 @@
 namespace jade {
 
 using CrowServer = crow::Crow<
-    // Local handlers {{{
-    // These two must precede all other handlers, so their 
-    // .after_handle is always called. 
-    APIErrorHandler, WebError,
+    // Global handlers {{{
     SecurityMetaHeaders,
     crow::CookieParser,
+    ErrorHandler,
+    // }}}
+    // Local handlers {{{
 
+    // These two must precede all other handlers, so their 
+    // .after_handle is always called. 
     UserContextM
+
     // }}}
 
 >;

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "crow/mustache.h"
+#include <crow.h>
 #include "jade/conf/ServerConfig.hpp"
 #include "jade/core/Typedefs.hpp"
+#include "jade/db/ConnectionPool.hpp"
 
 namespace jade {
 
@@ -11,19 +12,22 @@ private:
     ServerConfig cfg;
     std::string assetBaseDir;
 
-
     void bootstrap();
     void initEndpoints();
+    
+    void dbMigrations();
 public:
+    std::shared_ptr<ConnectionPool> pool;
+
+    static inline Server* inst = nullptr;
     CrowServer app;
 
     Server(
         const std::filesystem::path& confDir
     );
+    ~Server();
 
     void run();
-
-    crow::mustache::context buildCommonContext();
 
     CrowServer* operator->() {
         return &app;

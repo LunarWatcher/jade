@@ -1,5 +1,7 @@
 #include "WebProvider.hpp"
+#include "crow/common.h"
 #include "jade/core/ContextProvider.hpp"
+#include "jade/server/UserContextMiddleware.hpp"
 #include <jade/core/Macros.hpp>
 #include <jade/core/Server.hpp>
 
@@ -14,9 +16,11 @@ void WebProvider::init(Server* server) {
         .methods(crow::HTTPMethod::GET)
         (JADE_CALLBACK_BINDING(getLogin));
 
+    // Redirects {{{
     CROW_ROUTE(server->app, "/index.html")
         .methods(crow::HTTPMethod::GET)
-        ([](crow::response& res) { res.redirect("/"); });
+        ([](crow::response& res) { res.redirect_perm("/"); });
+    // }}}
 
 }
 
@@ -29,8 +33,7 @@ void WebProvider::getRootIndex(Server* server, crow::request& req, crow::respons
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(0, req, pageCtx, server);
 
-    res.body = page.render_string(ctx);
-    res.set_header("Content-Type", "text/html");
+    res = page.render(ctx);
     res.end();
 }
 
@@ -43,8 +46,7 @@ void WebProvider::getLogin(Server* server, crow::request& req, crow::response& r
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(0, req, pageCtx, server);
 
-    res.body = page.render_string(ctx);
-    res.set_header("Content-Type", "text/html");
+    res = page.render(ctx);
     res.end();
 }
 

@@ -1,9 +1,22 @@
 add_library(jadesrc STATIC 
-    jade/core/Server.cpp
+    jade/api/APIProvider.cpp
+    jade/api/auth/AuthAPI.cpp
+
+    jade/conf/ServerConfig.cpp
+
     jade/core/ContextProvider.cpp
+    jade/core/Server.cpp
+
+    jade/data/AuthRequest.cpp
+
+    jade/db/ConnectionPool.cpp
+    jade/db/Migration.cpp
+    jade/db/security/Hash.cpp
 
     jade/server/BaseMiddlewares.cpp
     jade/server/UserContextMiddleware.cpp
+
+    jade/util/ResponseUtil.cpp
 
     jade/web/WebProvider.cpp
 )
@@ -17,6 +30,7 @@ PUBLIC
     spdlog::spdlog
     nlohmann_json::nlohmann_json
     Crow::Crow
+    OpenSSL::Crypto
     CLI11::CLI11
     pqxx
 )
