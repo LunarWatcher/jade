@@ -1,16 +1,17 @@
 #pragma once
 
+#include "nlohmann/json.hpp"
 #include <string>
 
 namespace jade {
 
 struct User {
+    long long userId;
     std::string username;
-    std::string password;
-    int hashVersion;
-
     bool isAdmin;
-    bool canUpload;
 };
+
+void from_json(const nlohmann::json& src, User& dest);
+void to_json(nlohmann::json& src, const User& dest);
 
 }

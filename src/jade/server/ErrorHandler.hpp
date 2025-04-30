@@ -27,6 +27,8 @@ public:
                 // TODO: this isn't _great_ when the message is auto-generated.
                 if (res.code == 404)  {
                     message = "invalid endpoint";
+                } else if (res.code < 500) {
+                    return;
                 }
                 res.set_header("Content-Type", ContentType::json);
                 res.body = nlohmann::json {

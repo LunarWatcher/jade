@@ -2,6 +2,7 @@
     --jade-theme-jade: #00A86B;
     --jade-theme-pink: #D30060;
     --jade-theme-orange: #FBA700;
+    --jade-theme-grey: #bababa;
 
     --jade-theme-font: 400 1rem Ubuntu, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
         "Segoe UI Emoji", "Segoe UI Symbol";
@@ -35,6 +36,8 @@
     --shadow-colour: var(--background-primary);
     --coloured-shadow: 2px 2px 4px var(--shadow-colour);
 
+    --disabled-background-colour: var(--jade-theme-grey);
+    --disabled-foreground-colour: white;
 }
 
 * {
@@ -94,11 +97,16 @@ button, input[type="submit"] {
     transition: 250ms ease-in;
 }
 
-button:hover, input[type="submit"]:hover {
+button:hover:not(:disabled), input[type="submit"]:hover:not(:disabled) {
     background-color: var(--background-primary-active);
     box-shadow: var(--coloured-shadow);
     cursor: pointer;
 
+}
+
+button:disabled, input:disabled {
+    background-color: var(--disabled-background-colour);
+    color: var(--disabled-foreground-colour);
 }
 
 .boxed-container {

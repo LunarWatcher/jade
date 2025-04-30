@@ -8,13 +8,14 @@ add_library(jadesrc STATIC
     jade/core/Server.cpp
 
     jade/data/AuthRequest.cpp
+    jade/data/User.cpp
 
     jade/db/ConnectionPool.cpp
     jade/db/Migration.cpp
     jade/db/security/Hash.cpp
 
     jade/server/BaseMiddlewares.cpp
-    jade/server/UserContextMiddleware.cpp
+    jade/server/SessionMiddleware.cpp
 
     jade/util/ResponseUtil.cpp
 

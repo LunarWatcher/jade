@@ -1,17 +1,17 @@
 #include "AuthAPI.hpp"
 
 #include <crow.h>
-#include <cstddef>
 
 #include "crow/common.h"
+#include "crow/middlewares/session.h"
 #include "jade/api/auth/AuthAPI.hpp"
 #include "jade/core/Macros.hpp"
 #include "jade/core/Server.hpp"
 
 #include "jade/data/AuthRequest.hpp"
+#include "jade/data/User.hpp"
 #include "jade/db/ConnectionPool.hpp"
 #include "jade/db/security/Hash.hpp"
-#include "jade/server/UserContextMiddleware.hpp"
 #include "jade/util/ResponseUtil.hpp"
 #include "spdlog/spdlog.h"
 
@@ -20,12 +20,12 @@ namespace jade {
 void AuthAPI::init(Server *server) {
     CROW_ROUTE(server->app, "/api/auth/login")
         .methods(crow::HTTPMethod::POST)
-        .CROW_MIDDLEWARES(server->app, UserContextM)
+        //.CROW_MIDDLEWARES(server->app, SessionMiddleware)
         (JADE_CALLBACK_BINDING(AuthAPI::login));
 
     CROW_ROUTE(server->app, "/api/auth/signup")
         .methods(crow::HTTPMethod::POST)
-        .CROW_MIDDLEWARES(server->app, UserContextM)
+        //.CROW_MIDDLEWARES(server->app, SessionMiddleware)
         (JADE_CALLBACK_BINDING(AuthAPI::signup));
 
     // Pseudo-catchall, leaving this for future reference since blueprints have been broken for around 1.5 years, and
@@ -40,13 +40,14 @@ void AuthAPI::init(Server *server) {
 }
 
 void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
-    auto userCtx = (*server)->get_context<UserContextM>(req);
+    auto& userCtx = (*server)->get_context<MSessionMiddleware>(req);
 
-    if (userCtx.user.has_value()) {
+    if (userCtx.data && userCtx.data->user) {
         res.code = 200;
         res.body = R"({"message": "already logged in"})";
         return;
     }
+
 
     LoginRequest data = nlohmann::json::parse(req.body);
 
@@ -62,7 +63,7 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
         if (!row.has_value()) {
             res = JSONResponse {
                 nlohmann::json {
-                    {"message", "User does not exist"},
+                    {"message", "User does not exist, or the password is incorrect"},
                 }
             };
             res.code = 401;
@@ -74,7 +75,7 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
             spdlog::info("{} provided a bad password", req.remote_ip_address);
             res = JSONResponse {
                 nlohmann::json {
-                    {"message", "User does not exist"},
+                    {"message", "User does not exist, or the password is incorrect"},
                 }
             };
             res.code = 401;
@@ -84,15 +85,16 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
         // Login succeeded
         // TODO: handle password upgrades
 
-        res = JSONResponse {
-            nlohmann::json {
-                {"user", {
-                    {"userId", std::get<0>(*row)},
-                    {"username", std::get<1>(*row)},
-                    {"isAdmin", std::get<5>(*row)},
-                }}
-            }
+        userCtx.newSession();
+        User u {
+            std::get<0>(*row),
+            std::get<1>(*row),
+            std::get<5>(*row),
         };
+        res = JSONResponse {
+            nlohmann::json {{"user", u},}
+        };
+        userCtx.data->user = u;
 
     });
 
@@ -100,9 +102,9 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
 }
 
 void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
-    auto userCtx = (*server)->get_context<UserContextM>(req);
+    auto& userCtx = (*server)->get_context<MSessionMiddleware>(req);
 
-    if (userCtx.user.has_value()) {
+    if (userCtx.data && userCtx.data->user) {
         res = JSONResponse{
             R"({"message": "you already have an account, wtf are you doing?"})"
         };

@@ -4,4 +4,8 @@
     <meta http-equiv="Content-language" content = "en-GB"/>
 
     <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+
+    {{#Page.Scripts}}
+        <script src="{{.}}" charset="utf-8"></script>
+    {{/Page.Scripts}}
 </head>

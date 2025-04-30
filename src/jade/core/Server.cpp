@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "crow/app.h"
+#include "crow/middlewares/session.h"
 #include "jade/api/APIProvider.hpp"
+#include "jade/core/Typedefs.hpp"
 #include "jade/db/ConnectionPool.hpp"
 #include "jade/db/Migration.hpp"
 #include "jade/web/WebProvider.hpp"
@@ -12,7 +14,7 @@
 
 namespace jade {
 
-Server::Server(const std::filesystem::path& confDir) {
+Server::Server(const std::filesystem::path& confDir) : app() {
     inst = this;
     std::ifstream f(confDir / "config.json");
 

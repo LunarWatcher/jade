@@ -1,7 +1,7 @@
 #pragma once
 
 #include "jade/server/ErrorHandler.hpp"
-#include "jade/server/UserContextMiddleware.hpp"
+#include "jade/server/SessionMiddleware.hpp"
 #include <crow.h>
 #include <crow/middlewares/cookie_parser.h>
 
@@ -9,20 +9,21 @@
 
 namespace jade {
 
+using MSessionMiddleware =  jade::SessionMiddleware<jade::InMemoryStorage>;
 using CrowServer = crow::Crow<
     // Global handlers {{{
     SecurityMetaHeaders,
-    crow::CookieParser,
     ErrorHandler,
+    crow::CookieParser,
+    MSessionMiddleware
     // }}}
     // Local handlers {{{
 
-    // These two must precede all other handlers, so their 
-    // .after_handle is always called. 
-    UserContextM
+
 
     // }}}
 
 >;
+
 
 }

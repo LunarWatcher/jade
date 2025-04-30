@@ -1,7 +1,6 @@
 #include "WebProvider.hpp"
 #include "crow/common.h"
 #include "jade/core/ContextProvider.hpp"
-#include "jade/server/UserContextMiddleware.hpp"
 #include <jade/core/Macros.hpp>
 #include <jade/core/Server.hpp>
 
@@ -41,7 +40,10 @@ void WebProvider::getLogin(Server* server, crow::request& req, crow::response& r
     static ContextProvider::PageContext pageCtx {
         .pageTitle = "Log in | Jade",
         .pageDescription = "Log in to Jade",
-        .pageFile = "login.mustache"
+        .pageFile = "login.mustache",
+        .pageScripts = {
+            "/static/js/auth.js"
+        }
     };
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(0, req, pageCtx, server);

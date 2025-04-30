@@ -1,6 +1,5 @@
 #include "ContextProvider.hpp"
 #include "crow/mustache.h"
-#include "jade/server/UserContextMiddleware.hpp"
 #include <jade/core/Server.hpp>
 
 namespace jade {
@@ -13,11 +12,11 @@ crow::mustache::context ContextProvider::buildBaseContext(
 ) {
     crow::mustache::context ctx = baseCtx.getContext();
     if (contextScope & USER) {
-        UserContextM::context& userData = (*serv)->get_context<UserContextM>(req);
+        assert (serv != nullptr);
 
-        if (userData.user.has_value()) {
+        MSessionMiddleware::context& userData = (*serv)->get_context<MSessionMiddleware>(req);
 
-        }
+
     }
 
     return ctx;
