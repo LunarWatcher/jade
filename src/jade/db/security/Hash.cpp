@@ -1,11 +1,9 @@
 #include "Hash.hpp"
+#include "jade/security/Random.hpp"
 
-#include <random>
 #include <openssl/sha.h>
 #include <optional>
 #include <openssl/evp.h>
-#include <random>
-#include <sstream>
 
 namespace jade {
 
@@ -15,7 +13,7 @@ Hash::HashResult Hash::hash(
     std::optional<int> version
 ) {
     if (!salt) {
-        salt = _detail::generateSalt();
+        salt = generateToken<34>();
     }
     // Set to the latest version when adding new versions
     // (And make sure I handled upgrades before and while doing so :) )
@@ -45,20 +43,6 @@ Hash::HashResult Hash::hash(
 }
 
 namespace Hash {
-
-std::string _detail::generateSalt(size_t len) {
-    std::random_device dev;
-    std::uniform_int_distribution<int> dist(0,
-        125 // ASCII: }
-        - 33 // ASCII: !
-    );
-    std::stringstream ss;
-    for (size_t i = 0; i < len; ++i) {
-        ss << (char) (33 + dist(dev));
-    }
-
-    return ss.str();
-}
 
 std::string _detail::pbkdf2_sha512(const std::string &pass, const std::string &salt, int iterations) {
     unsigned char digest[SHA512_DIGEST_LENGTH];

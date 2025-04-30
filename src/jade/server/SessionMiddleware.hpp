@@ -30,7 +30,35 @@ struct Storage {
 
 /**
  * Session middleware inspired by Crow's SessionMiddleware, but written from scratch to be more portable and more
- * security-oriented.
+ * security-oriented. Specifically, the middleware is designed to have a much easier way to kill sessions, and create
+ * new sessions during login. There's also a way to completely kill sessions, which is useful for logging out. 
+ *
+ * These changes primarily defend against:
+ * * OWASP A07[^1], which Crow's built-in session does not handle. Particularly bullets 8 and 9 of the description are
+ * ignored
+ * * Various pseudorandom attacks. Crow's random engine uses `std::random_device` by default[^2][^3], which is usually
+ *      fantastic, but not when dealing with sessions. This session system uses OpenSSL[^4] for a secure random.
+ * * Though not yet implemented, token refreshing in this system issues a new token on refresh. Though probably
+ *      unnecessary given how long the tokens are, it's just convenient to do.
+ *
+ * Additionally, the changes themselves wiping cookies means it's easier to avoid retaining bad states on the client
+ * side. Not sure if that really matters in practice, but it is a nice benefit. Additionally, due to the middleware
+ * being very weirdly designed, this not being obvious makes it very easy to inadvertently fail to invalidate sessions
+ * even if you treat the token invalidation as an acceptable problem.
+ *
+ * As an obligatory note, this application is neither meant to be public-facing, nor is it likely ever going to be a
+ * target of any form of attack (and if it is, there's almost certainly other vulnerabilities in crowcpp itself that
+ * deal significantly more psychic damage than breached session tokens), but this is hardened for the sake of learning
+ * how to harden login and session management.
+ *
+ * <sub>Honourable mention to V1 of this middleware, used in a now dead project, that was a steaming pile of crap and
+ * ignored the A02 violation.</sub>
+ *
+ * [^1]: https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+ * [^2]: https://github.com/CrowCpp/Crow/blob/master/include/crow/utility.h#L789
+ * [^3]: This happens to fail A02 under failure to ensure cryptographic requirements are met:
+ *      https://owasp.org/Top10/A02_2021-Cryptographic_Failures/
+ * [^4]: https://docs.openssl.org/3.1/man3/RAND_bytes/
  */
 template <typename T>
 requires CheckType<T, Storage>
