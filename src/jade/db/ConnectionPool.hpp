@@ -13,7 +13,15 @@ public:
         const std::string& connectionString
     );
 
-    void acquire(std::function<void(pqxx::connection& conn)>);
+    template <typename T>
+    auto acquire(std::function<T(pqxx::connection&)> callback) -> T {
+        auto conn = std::make_shared<pqxx::connection>(connectionString);
+        if constexpr (std::is_same_v<T, void>) {
+            callback(*conn);
+        } else {
+            return callback(*conn);
+        }
+    }
 
 };
 

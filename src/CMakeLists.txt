@@ -1,6 +1,7 @@
 add_library(jadesrc STATIC 
     jade/api/APIProvider.cpp
     jade/api/auth/AuthAPI.cpp
+    jade/api/settings/SettingsAPI.cpp
 
     jade/conf/ServerConfig.cpp
 
@@ -8,11 +9,14 @@ add_library(jadesrc STATIC
     jade/core/Server.cpp
 
     jade/data/AuthRequest.cpp
+    jade/data/SettingsRequests.cpp
     jade/data/User.cpp
 
     jade/db/ConnectionPool.cpp
     jade/db/Migration.cpp
     jade/db/security/Hash.cpp
+
+    jade/library/Library.cpp
 
     jade/server/BaseMiddlewares.cpp
     jade/server/SessionMiddleware.cpp

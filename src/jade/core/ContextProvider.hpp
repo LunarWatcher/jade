@@ -11,8 +11,16 @@ class Server;
 
 namespace ContextProvider {
 
+/**
+ * Defines what additional (but still standard) data objects to add to the mustache context.
+ *
+ * Note for developers: Due to how the context scope is set, each enum value must be 2^n, so they can be binary `or`ed
+ * to allow multiple scopes. This theoretically limits the number of scopes to 64, which is far more than what's
+ * reasonable to include in code.
+ */
 enum ContextScope {
-    USER = 1
+    USER = 1,
+    LIBRARIES = 2,
 };
 
 struct PageContext {
@@ -57,7 +65,7 @@ struct PageContext {
  * \param serv              The Server instance: only used if contextScope != 0, and must be non-null if contextScope !=
  *                          0. May be null if contextScope is 0
  */
-crow::mustache::context buildBaseContext(
+extern crow::mustache::context buildBaseContext(
     int contextScope,
     crow::request& req,
     PageContext& baseCtx,
@@ -79,6 +87,22 @@ inline crow::mustache::template_t getBaseTemplate() {
     crow::mustache::template_t body = crow::mustache::load("partials/body.mustache");
 
     return body;
+}
+
+namespace _detail {
+
+extern void buildUserContext(
+    crow::mustache::context& ctx,
+    crow::request& req,
+    Server* serv
+);
+
+extern void buildLibraryContext(
+    crow::mustache::context& ctx,
+    crow::request& req,
+    Server* serv
+);
+
 }
 
 }

@@ -5,6 +5,7 @@
 #include "jade/core/Typedefs.hpp"
 #include "jade/db/ConnectionPool.hpp"
 #include "jade/db/Migration.hpp"
+#include "jade/library/Library.hpp"
 #include "jade/web/WebProvider.hpp"
 
 #include <filesystem>
@@ -31,6 +32,12 @@ Server::Server(const std::filesystem::path& confDir) : app() {
     pool = std::make_shared<ConnectionPool>(
         cfg.getConnString()
     );
+
+    pool->acquire<void>([this](auto& conn) {
+        lib = std::make_shared<Library>(
+            conn
+        );
+    });
 
     bootstrap();
     dbMigrations();
@@ -82,7 +89,8 @@ void Server::dbMigrations() {
     );
     CREATE TABLE Jade.Libraries (
         LibraryID   SERIAL          PRIMARY KEY,
-        Location    TEXT
+        Location    TEXT            NOT NULL,
+        AgeRating   INTEGER,
     );
     CREATE TABLE Jade.Books (
         BookID      SERIAL          PRIMARY KEY,
@@ -93,7 +101,7 @@ void Server::dbMigrations() {
     );
     )");
 
-    pool->acquire([&](auto& conn) {
+    pool->acquire<void>([&](auto& conn) {
         {
             pqxx::work tx{conn};
             tx.exec("CREATE SCHEMA IF NOT EXISTS Jade");

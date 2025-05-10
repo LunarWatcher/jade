@@ -10,7 +10,10 @@ namespace jade {
 
 /**
  * Replaces plain errors with full pages (for non-API endpoints), or with a well-defined JSON response wrapping the
- * existing body as a message
+ * existing body as a message.
+ *
+ * Note that for API endpoints, the replacement mechanics only happen for 404s and 5xx errors. It's assumed that
+ * endpoints error handle with first-class JSON.
  */
 class ErrorHandler {
 public:

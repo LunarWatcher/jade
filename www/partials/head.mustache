@@ -3,9 +3,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10"/>
     <meta http-equiv="Content-language" content = "en-GB"/>
 
+    <title>{{Page.Title}}</title>
+
     <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
 
+    <script src="/static/js/global.js" charset="utf-8"></script>
     {{#Page.Scripts}}
-        <script src="{{.}}" charset="utf-8"></script>
+        <script src="{{.}}" charset="utf-8" defer></script>
     {{/Page.Scripts}}
 </head>

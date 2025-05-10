@@ -1,5 +1,6 @@
 #pragma once
 
+#include "crow/middleware.h"
 #include "crow/middlewares/cookie_parser.h"
 #include "jade/data/User.hpp"
 #include "jade/meta/Common.hpp"
@@ -181,7 +182,6 @@ public:
     }
 };
 
-
 struct InMemoryStorage : public Storage {
     std::shared_mutex m;
     std::map<std::string, std::shared_ptr<SessionData>> data;
@@ -193,5 +193,7 @@ struct InMemoryStorage : public Storage {
     std::shared_ptr<SessionData> getSessionData(const std::string& key) override;
 
 };
+
+using MSessionMiddleware =  jade::SessionMiddleware<jade::InMemoryStorage>;
 
 }

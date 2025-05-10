@@ -4,6 +4,7 @@
 #include "jade/conf/ServerConfig.hpp"
 #include "jade/core/Typedefs.hpp"
 #include "jade/db/ConnectionPool.hpp"
+#include "jade/library/Library.hpp"
 
 namespace jade {
 
@@ -18,6 +19,7 @@ private:
     void dbMigrations();
 public:
     std::shared_ptr<ConnectionPool> pool;
+    std::shared_ptr<Library> lib;
 
     static inline Server* inst = nullptr;
     CrowServer app;

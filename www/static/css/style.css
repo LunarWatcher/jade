@@ -44,6 +44,16 @@
     box-sizing: border-box;
 }
 
+table {
+    border-collapse: collapse;
+}
+
+table thead th {
+    border: none;
+    border-bottom: 2px solid var(--background-primary);
+    text-align: start;
+}
+
 body {
     color: var(--regular-text-colour);
     background: var(--regular-background-colour);
@@ -54,9 +64,14 @@ body {
     margin: 0;
 }
 
+header, footer {
+    flex: 0 1 auto;
+}
+
 main {
     flex: 1 0 auto;
     display: flex;
+    padding: 8px;
 }
 
 .flex-vertical {
@@ -91,6 +106,7 @@ form input {
 button, input[type="submit"] {
     background-color: var(--background-primary);
     color: var(--foreground-primary);
+    padding: 8px;
 
     border: none;
     border-radius: 0px;
@@ -112,4 +128,46 @@ button:disabled, input:disabled {
 .boxed-container {
     padding: 8px;
     max-width: 500px;
+}
+
+header {
+    display: flex;
+    flex-direction: row;
+
+    background-color: var(--background-primary);
+}
+
+header div, header li {
+    display: flex;
+}
+
+header a {
+    color: var(--foreground-primary);
+    padding: 16px;
+}
+
+header a:hover {
+    background-color: var(--background-primary-active);
+}
+
+header > div {
+    flex: 1 1 auto;
+}
+
+header > nav {
+    flex: 0 1 auto;
+    align-self: end;
+}
+
+header > nav > ul {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    margin: 0;
+    padding: inherit;
+}
+header > nav > ul > li {
+    flex: 1 0 auto;
+
 }

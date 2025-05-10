@@ -20,12 +20,10 @@ namespace jade {
 void AuthAPI::init(Server *server) {
     CROW_ROUTE(server->app, "/api/auth/login")
         .methods(crow::HTTPMethod::POST)
-        //.CROW_MIDDLEWARES(server->app, SessionMiddleware)
         (JADE_CALLBACK_BINDING(AuthAPI::login));
 
     CROW_ROUTE(server->app, "/api/auth/signup")
         .methods(crow::HTTPMethod::POST)
-        //.CROW_MIDDLEWARES(server->app, SessionMiddleware)
         (JADE_CALLBACK_BINDING(AuthAPI::signup));
 
     // Pseudo-catchall, leaving this for future reference since blueprints have been broken for around 1.5 years, and
@@ -51,10 +49,10 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
 
     LoginRequest data = nlohmann::json::parse(req.body);
 
-    server->pool->acquire([&](auto& conn) {
+    server->pool->acquire<void>([&](auto& conn) {
         pqxx::work tx(conn);
         auto row = tx.query01<long long, std::string, std::string, std::string, long long, bool>(
-            "SELECT UserID, Username, Password, Salt, Version, IsAdmin FROM Users WHERE Username = $1",
+            "SELECT UserID, Username, Password, Salt, Version, IsAdmin FROM Jade.Users WHERE Username = $1",
             pqxx::params{
                 data.username
             }
@@ -115,10 +113,10 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
     SignupRequest data = nlohmann::json::parse(req.body);
 
 
-    server->pool->acquire([&](auto& conn) {
+    server->pool->acquire<void>([&](auto& conn) {
         pqxx::work tx(conn);
         auto exists = tx.query1<bool>(
-            "SELECT EXISTS(SELECT 1 FROM Users WHERE Username = $1)", 
+            "SELECT EXISTS(SELECT 1 FROM Jade.Users WHERE Username = $1)", 
             pqxx::params {data.username}
         );
         auto hasExistingUser = tx.query1<long long>("SELECT COUNT(*) FROM Users");
@@ -134,7 +132,7 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
 
         auto password = Hash::hash(data.password, std::nullopt);
         tx.exec(R"(
-        INSERT INTO Users (Username, Password, Salt, Version, IsAdmin)
+        INSERT INTO Jade.Users (Username, Password, Salt, Version, IsAdmin)
         VALUES ($1, $2, $3, $4, $5);
         )", pqxx::params {
             data.username,

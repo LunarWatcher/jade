@@ -1,3 +1,20 @@
 <header>
-
+    <div class="home-button">
+        <a href="/">Jade</a>
+    </div>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            {{#User}}
+                <li><a href="/settings/user.html">Settings</a></li>
+                {{#IsAdmin}}
+                <li><a href="/settings/system.html">Admin settings</a></li>
+                {{/IsAdmin}}
+            {{/User}}
+            {{^User}}
+                <li><a href="/auth/login.html">Log in</a></li>
+                <li><a href="/auth/signup.html">Sign up</a></li>
+            {{/User}}
+        </ul>
+    </nav>
 </header>

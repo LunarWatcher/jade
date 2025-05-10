@@ -1,0 +1,33 @@
+<h1>Admin settings</h1>
+
+<h2>Libraries</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Library ID</th>
+            <th>Library location</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#Library}}
+        <tr>
+            <td>{{ID}}</td>
+            <td>{{Location}}</td>
+            <td><button data-library-id="{{ID}}">Delete library</button></td>
+        </tr>
+        {{/Library}}
+    </tbody>
+</table>
+
+<h3>Add a library</h3>
+<p>Please be careful when entering the path. Though some validation is done, it will happily let you enter potentially sensitive paths. 
+There is no autocomplete either - it's strongly suggested that you copy the path from somewhere.</p>
+<form class="boxed-container flex-vertical" onsubmit="addLibrary(event)">
+    <label for="library_location">Path to library</label>
+    <input type="text" name="library_location" />
+
+    <input type="submit" value="Add library" />
+    
+</form>

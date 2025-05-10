@@ -28,18 +28,18 @@ function login(ev) {
             if (res.status != 200) {
                 res.json().then(json => {
                     console.log(json);
-                    alert(json["message"]);
+                    showDialog(json["message"]);
                 })
             } else {
                 res.json().then(json => {
                     localStorage.setItem("user", JSON.stringify(json["user"]));
-                    window.location.href = "/app";
+                    window.location.href = "/";
                 })
             }
         })
         .catch(err => {
             setEnabled(true);
-            alert("Failed to connect to the server. Try again later");
+            showDialog("Failed to connect to the server. Try again later");
             console.log(err);
         });
 

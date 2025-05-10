@@ -21,4 +21,13 @@ public:
     std::string dump() const override;
 };
 
+class JSONMessageResponse : public JSONResponse {
+public:
+    JSONMessageResponse(const std::string& message) : JSONResponse(
+        nlohmann::json {
+            {"message", message},
+        }
+    ) {}
+};
+
 }
