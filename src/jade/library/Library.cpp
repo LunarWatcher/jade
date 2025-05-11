@@ -1,4 +1,5 @@
 #include "Library.hpp"
+#include "jade/health/HealthCheck.hpp"
 #include "spdlog/spdlog.h"
 #include <iterator>
 
@@ -76,6 +77,30 @@ bool Library::createLibrary(Server* serv, const std::string& location) {
         };
         return true;
     });
+}
+
+std::vector<health::HealthResult> Library::checkHealth() {
+    std::vector<health::HealthResult> out;
+
+    {
+        std::vector<health::HealthCheck> sourceChecks;
+
+        for (auto& [id, source] : this->sources) {
+            auto isValid = source.isValid();
+            sourceChecks.push_back({
+                isValid,
+                source.dir.string(),
+                isValid ? "" : "Path does not exist, or is not a directory"
+            });
+        }
+
+        out.push_back({
+            "Library sources",
+            sourceChecks
+        });
+    }
+
+    return out;
 }
 
 }

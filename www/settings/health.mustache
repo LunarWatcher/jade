@@ -1,0 +1,37 @@
+<h1>Health checks</h1>
+
+{{^Health.Fails}}
+<p>System healthy. All {{Health.TotalChecks}} checks passed!</p>
+{{/Health.Fails}}
+{{#Health.Fails}}
+<p>{{.}}/{{Health.TotalChecks}} checks failed!</p>
+{{/Health.Fails}}
+
+
+{{#Health.Results}}
+    <h2>{{NodeIdentifier}}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 10rem;">Passed</th>
+                <th style="width: 70%">Check identifier</th>
+                <th style="width: 30%">Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#Checks}}
+                <tr>
+                    {{#Passed}}
+                    <td class="pass"></td>
+                    {{/Passed}}
+                    {{^Passed}}
+                    <td class="fail"></td>
+                    {{/Passed}}
+
+                    <td>{{Identifier}}</td>
+                    <td>{{Message}}</td>
+                </tr>
+            {{/Checks}}
+        </tbody>
+    </table>
+{{/Health.Results}}

@@ -1,11 +1,12 @@
 #pragma once
 
+#include "jade/health/HealthCheck.hpp"
 #include <string>
 #include <pqxx/pqxx>
 
 namespace jade {
 
-class ConnectionPool {
+class ConnectionPool : public health::HealthCheckable {
 private:
     const std::string connectionString;
 public:
@@ -22,6 +23,8 @@ public:
             return callback(*conn);
         }
     }
+
+    std::vector<health::HealthResult> checkHealth() override;
 
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "jade/server/SessionMiddleware.hpp"
+#include "jade/health/HealthCheck.hpp"
 #include <pqxx/pqxx>
 #include <filesystem>
 #include <shared_mutex>
@@ -13,11 +13,16 @@ struct Source {
     std::filesystem::path dir;
 
     std::chrono::system_clock::time_point lastUpdate;
+
+    bool isValid() {
+        return std::filesystem::is_directory(dir);
+    }
+
 };
 
 class Server;
 
-class Library {
+class Library : public health::HealthCheckable {
 private:
     std::unordered_map<int64_t, Source> sources;
     std::shared_mutex m;
@@ -37,6 +42,8 @@ public:
         std::shared_lock l(m);
         return sources; 
     }
+
+    std::vector<health::HealthResult> checkHealth() override;
 
 };
 

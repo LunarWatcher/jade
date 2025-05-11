@@ -20,10 +20,17 @@ void WebProvider::init(Server* server) {
         .methods(crow::HTTPMethod::GET)
         .CROW_MIDDLEWARES((server->app), NeedsAdmin)
         (JADE_CALLBACK_BINDING(getAdminSettings));
+    CROW_ROUTE(server->app, "/settings/health.html")
+        .methods(crow::HTTPMethod::GET)
+        .CROW_MIDDLEWARES((server->app), NeedsAdmin)
+        (JADE_CALLBACK_BINDING(getHealth));
 
     CROW_ROUTE(server->app, "/auth/login.html")
         .methods(crow::HTTPMethod::GET)
         (JADE_CALLBACK_BINDING(getLogin));
+    CROW_ROUTE(server->app, "/auth/signup.html")
+        .methods(crow::HTTPMethod::GET)
+        (JADE_CALLBACK_BINDING(getSignup));
 
     // Redirects {{{
     CROW_ROUTE(server->app, "/index.html")
@@ -64,7 +71,29 @@ void WebProvider::getLogin(Server* server, crow::request& req, crow::response& r
     static ContextProvider::PageContext pageCtx {
         .pageTitle = "Log in | Jade",
         .pageDescription = "Log in to Jade",
-        .pageFile = "login.mustache",
+        .pageFile = "auth/login.mustache",
+        .pageScripts = {
+            "/static/js/auth.js"
+        }
+    };
+    auto page = ContextProvider::getBaseTemplate();
+    auto ctx = ContextProvider::buildBaseContext(0, req, pageCtx, server);
+
+    res = page.render(ctx);
+    res.end();
+}
+
+void WebProvider::getSignup(Server* server, crow::request& req, crow::response& res) {
+    auto userCtx = server->app.get_context<MSessionMiddleware>(req);
+    if (userCtx.data && userCtx.data->user) {
+        res.redirect("/");
+        res.end();
+        return;
+    }
+    static ContextProvider::PageContext pageCtx {
+        .pageTitle = "Sign up | Jade",
+        .pageDescription = "Sign up to Jade",
+        .pageFile = "auth/signup.mustache",
         .pageScripts = {
             "/static/js/auth.js"
         }
@@ -91,6 +120,25 @@ void WebProvider::getAdminSettings(Server* server, crow::request& req, crow::res
         ContextProvider::USER | ContextProvider::LIBRARIES, 
         req, pageCtx, server
     );
+
+    res = page.render(ctx);
+    res.end();
+}
+
+void WebProvider::getHealth(Server* server, crow::request& req, crow::response& res) {
+    auto userCtx = server->app.get_context<MSessionMiddleware>(req);
+    static ContextProvider::PageContext pageCtx {
+        .pageTitle = "Diagnostics | Jade",
+        .pageDescription = "Jade system diagnostics",
+        .pageFile = "settings/health.mustache"
+    };
+    auto page = ContextProvider::getBaseTemplate();
+    auto ctx = ContextProvider::buildBaseContext(
+        ContextProvider::USER | ContextProvider::LIBRARIES, 
+        req, pageCtx, server
+    );
+
+    ctx["Health"] = server->healthCore.getJSONResults();
 
     res = page.render(ctx);
     res.end();

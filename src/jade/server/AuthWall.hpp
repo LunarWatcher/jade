@@ -3,6 +3,7 @@
 #include "crow/middleware.h"
 #include "jade/server/SessionMiddleware.hpp"
 #include "jade/util/ResponseUtil.hpp"
+#include <cpr/cpr.h>
 
 namespace jade {
 
@@ -20,7 +21,9 @@ struct RequireAuthedUserMiddleware : public crow::ILocalMiddleware {
                 res = JSONMessageResponse("This endpoint requires authentication.");
                 res.code = crow::FORBIDDEN;
             } else {
-                res.redirect("/auth/login.html");
+                // TODO: make sure `redirect` properly urlencodes
+                // Or: check if there's another way to set the URL that's more crow-y
+                res.redirect("/auth/login.html?redirect=" + req.url);
             }
             res.end();
         } else if constexpr (NeedsAdmin) {

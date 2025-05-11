@@ -38,6 +38,9 @@
 
     --disabled-background-colour: var(--jade-theme-grey);
     --disabled-foreground-colour: white;
+
+    --background-success: green;
+    --background-fail: red;
 }
 
 * {
@@ -171,3 +174,16 @@ header > nav > ul > li {
     flex: 1 0 auto;
 
 }
+
+td, th {
+    padding: 4px;
+}
+
+td.pass {
+    background-color: var(--background-success);
+}
+
+td.fail {
+    background-color: var(--background-fail);
+}
+

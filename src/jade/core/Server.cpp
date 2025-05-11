@@ -33,14 +33,17 @@ Server::Server(const std::filesystem::path& confDir) : app() {
         cfg.getConnString()
     );
 
+
+    bootstrap();
+    dbMigrations();
+
     pool->acquire<void>([this](auto& conn) {
         lib = std::make_shared<Library>(
             conn
         );
     });
 
-    bootstrap();
-    dbMigrations();
+    initHealth();
 
 }
 
@@ -90,7 +93,7 @@ void Server::dbMigrations() {
     CREATE TABLE Jade.Libraries (
         LibraryID   SERIAL          PRIMARY KEY,
         Location    TEXT            NOT NULL,
-        AgeRating   INTEGER,
+        AgeRating   INTEGER
     );
     CREATE TABLE Jade.Books (
         BookID      SERIAL          PRIMARY KEY,
@@ -109,6 +112,13 @@ void Server::dbMigrations() {
         }
         m.prepMetatables(conn);
         m.exec(conn);
+    });
+}
+
+void Server::initHealth() {
+    healthCore.registerChecks({
+        lib,
+        pool
     });
 }
 

@@ -4,6 +4,7 @@
 #include "jade/conf/ServerConfig.hpp"
 #include "jade/core/Typedefs.hpp"
 #include "jade/db/ConnectionPool.hpp"
+#include "jade/health/HealthCore.hpp"
 #include "jade/library/Library.hpp"
 
 namespace jade {
@@ -17,9 +18,11 @@ private:
     void initEndpoints();
     
     void dbMigrations();
+    void initHealth();
 public:
     std::shared_ptr<ConnectionPool> pool;
     std::shared_ptr<Library> lib;
+    health::HealthCore healthCore;
 
     static inline Server* inst = nullptr;
     CrowServer app;
