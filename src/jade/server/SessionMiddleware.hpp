@@ -118,7 +118,6 @@ public:
     void after_handle(crow::request& req, crow::response& res, context& ctx, AllContext& globalCtx) {
         crow::CookieParser::context& cookies = globalCtx.template get<crow::CookieParser>();
         auto currSessToken = cookies.get_cookie("session");
-        std::cout << currSessToken << std::endl;
 
         if (ctx.wantsNewSession) {
             auto newSession = createSession(ctx.data);
@@ -131,7 +130,6 @@ public:
             // Dead session, session expired, server restarted, failed token fixation attack, etc.
             || (currSessToken != "" && !store.getSessionData(currSessToken))
         ) {
-            spdlog::warn("Killing session");
             // Cookie invalid or session requested killed; destroy cookie, and kill the session if it exists
             store.destroy(currSessToken);
             cookies.set_cookie(

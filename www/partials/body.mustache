@@ -6,6 +6,9 @@
         <main class="flex-vertical">
             {{&Content}}
         </main>
+        {{#Special.Sidebar}}
+        {{>partials/sidebar.mustache}}
+        {{/Special.Sidebar}}
         {{>partials/footer.mustache}}
     </body>
 </html>

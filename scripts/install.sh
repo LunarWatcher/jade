@@ -33,7 +33,6 @@ else
     sleep 10
 fi
 
-
 # Database init {{{
 # For non-interactive use, check for the PSQL_PASSWORD env variable before prompting
 if [[ "$PSQL_PASSWORD" == "" ]];

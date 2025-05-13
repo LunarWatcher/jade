@@ -2,6 +2,7 @@
 #include "crow/app.h"
 #include "crow/middlewares/session.h"
 #include "jade/api/APIProvider.hpp"
+#include "jade/api/books/BookAPI.hpp"
 #include "jade/core/Typedefs.hpp"
 #include "jade/db/ConnectionPool.hpp"
 #include "jade/db/Migration.hpp"
@@ -15,7 +16,7 @@
 
 namespace jade {
 
-Server::Server(const std::filesystem::path& confDir) : app() {
+Server::Server(const std::filesystem::path& confDir, Flags runtimeConfig) : app(), runtimeConfig(runtimeConfig) {
     inst = this;
     std::ifstream f(confDir / "config.json");
 
@@ -26,6 +27,7 @@ Server::Server(const std::filesystem::path& confDir) : app() {
     nlohmann::json j;
     f >> j;
     j.get_to(cfg);
+    cfg.createDirectories();
 
     spdlog::debug("Loaded config from {}/config.json", confDir.string());
 
@@ -39,8 +41,10 @@ Server::Server(const std::filesystem::path& confDir) : app() {
 
     pool->acquire<void>([this](auto& conn) {
         lib = std::make_shared<Library>(
+            this,
             conn
         );
+        lib->initScanProcess();
     });
 
     initHealth();
@@ -52,9 +56,12 @@ Server::~Server() {
 }
 
 void Server::bootstrap() {
-#ifdef JADE_DEBUG
-    app.loglevel(crow::LogLevel::DEBUG);
-#endif
+    if (runtimeConfig.debugCrow) {
+        app.loglevel(crow::LogLevel::DEBUG);
+    } else {
+        // TODO: make this configurable with warning as a default
+        app.loglevel(crow::LogLevel::WARNING);
+    }
 
     crow::mustache::set_global_base("www");
     crow::mustache::set_base("www");
@@ -82,6 +89,7 @@ void Server::initEndpoints() {
 void Server::dbMigrations() {
     Migration m;
     m.pushVersion(R"(
+    -- Object tables {{{
     CREATE TABLE Jade.Users (
         UserID      SERIAL          PRIMARY KEY,
         Username    TEXT UNIQUE     NOT NULL,
@@ -95,13 +103,44 @@ void Server::dbMigrations() {
         Location    TEXT            NOT NULL,
         AgeRating   INTEGER
     );
+    CREATE TABLE Jade.Tags (
+        TagID       SERIAL          PRIMARY KEY,
+        TagName     TEXT            NOT NULL
+    );
+    CREATE TABLE Jade.Collections (
+        CollectionID            SERIAL  PRIMARY KEY,
+        CollectionName          TEXT    NOT NULL,
+        CollectionDescription   TEXT
+    );
+    CREATE TABLE Jade.Series (
+        SeriesID            SERIAL  PRIMARY KEY,
+        SeriesName          TEXT    NOT NULL,
+        SeriesDescription   TEXT
+    );
     CREATE TABLE Jade.Books (
         BookID      SERIAL          PRIMARY KEY,
-        LibraryID   INTEGER         REFERENCES Libraries(LibraryID),
+        FileName    TEXT            NOT NULL,
+        LibraryID   INTEGER         REFERENCES Libraries(LibraryID) ON DELETE CASCADE,
+        SeriesID    INTEGER         REFERENCES Series(SeriesID) ON DELETE CASCADE,
         Title       TEXT            NOT NULL,
+        ISBN        TEXT,
         Description TEXT,
         AgeRating   INTEGER
     );
+    -- }}}
+    -- Relational tables {{{
+    CREATE TABLE Jade.BookTags (
+        BookID INTEGER NOT NULL REFERENCES Jade.Books(BookID) ON DELETE CASCADE,
+        TagID  INTEGER NOT NULL REFERENCES Jade.Tags(TagID) ON DELETE CASCADE,
+        PRIMARY KEY (BookID, TagID)
+    );
+    CREATE TABLE Jade.BookSeries (
+        BookID INTEGER NOT NULL REFERENCES Jade.Books(BookID) ON DELETE CASCADE,
+        SeriesID  INTEGER NOT NULL REFERENCES Jade.Series(SeriesID) ON DELETE CASCADE,
+        BookIndex       INTEGER NOT NULL,
+        PRIMARY KEY (BookID, SeriesID)
+    );
+    -- }}}
     )");
 
     pool->acquire<void>([&](auto& conn) {

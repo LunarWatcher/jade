@@ -41,6 +41,8 @@
 
     --background-success: green;
     --background-fail: red;
+
+    --background-code: #eaefea;
 }
 
 * {
@@ -61,17 +63,38 @@ body {
     color: var(--regular-text-colour);
     background: var(--regular-background-colour);
     font: var(--theme-font);
-    display: flex;
-    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+
+    display: grid;
+    grid-template-rows: auto 1fr auto;
     min-height: 100vh;
     margin: 0;
 }
 
+body:not(:has(>.sidebar)) {
+  grid-template-areas: "header" "main" "footer";
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+}
+body:has(>.sidebar) {
+  grid-template-areas: "header header" "sidebar main" "footer footer";
+  grid-template-columns: 2fr 6fr;
+  grid-template-rows: auto 1fr auto;
+}
+
+
 header, footer {
     flex: 0 1 auto;
+    flex-wrap: wrap;
+}
+
+footer {
+    grid-area: footer;
 }
 
 main {
+    grid-area: main;
     flex: 1 0 auto;
     display: flex;
     padding: 8px;
@@ -134,6 +157,7 @@ button:disabled, input:disabled {
 }
 
 header {
+    grid-area: header;
     display: flex;
     flex-direction: row;
 
@@ -163,16 +187,26 @@ header > nav {
 }
 
 header > nav > ul {
-    list-style: none;
-    display: flex;
     flex-direction: row;
     gap: 2px;
+}
+
+nav > ul > li {
+    flex: 1 0 auto;
+    padding: auto;
+    display: flex;
+}
+
+nav > ul {
+    display: flex;
     margin: 0;
+    list-style: none;
     padding: inherit;
 }
-header > nav > ul > li {
-    flex: 1 0 auto;
 
+nav a {
+    padding: 16px;
+    width: 100%;
 }
 
 td, th {
@@ -185,5 +219,47 @@ td.pass {
 
 td.fail {
     background-color: var(--background-fail);
+}
+
+code {
+    background-color: var(--background-code);
+    padding: 2px;
+}
+
+.style-secondary {
+    background-color: var(--background-secondary);
+    color: var(--foreground-secondary);
+}
+
+.style-secondary a {
+    color: var(--foreground-secondary);
+}
+
+.style-secondary a:hover {
+    background-color: var(--background-secondary-active);
+}
+
+.sidebar {
+    grid-area: sidebar;
+    min-width: 100px;
+    margin: 4px;
+    border-radius: 8px;
+}
+.sidebar ul {
+    flex-direction: column;
+}
+
+.sidebar li {
+    width: 100%;
+    border-bottom: 2px solid white;
+}
+
+@media (max-width: 600px) {
+    body:has(> .sidebar){
+        grid-template-areas: "header" "sidebar" "main" "footer";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr auto;
+    }
+
 }
 

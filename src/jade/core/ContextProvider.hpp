@@ -27,8 +27,10 @@ struct PageContext {
     std::string pageTitle;
     std::string pageDescription;
     std::string pageFile;
-    std::vector<crow::json::wvalue> pageScripts;
-    std::vector<crow::json::wvalue> pageCSS;
+    std::vector<crow::json::wvalue> pageScripts = {};
+    std::vector<crow::json::wvalue> pageCSS = {};
+
+    bool includeSidebar = false;
 
     /**
      * DO NOT FILL! Place all fields before this. This field will be auto-populated.
@@ -53,6 +55,10 @@ struct PageContext {
             };
             generated["Content"] = [&](std::string&) { \
                 return std::string("{{>" + pageFile + "}}"); \
+            };
+
+            generated["Special"] = {
+                {"Sidebar", this->includeSidebar},
             };
         }
 

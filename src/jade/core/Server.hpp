@@ -9,6 +9,10 @@
 
 namespace jade {
 
+struct Flags {
+    bool debugCrow = false;
+};
+
 class Server {
 private:
     ServerConfig cfg;
@@ -23,16 +27,22 @@ public:
     std::shared_ptr<ConnectionPool> pool;
     std::shared_ptr<Library> lib;
     health::HealthCore healthCore;
+    Flags runtimeConfig;
 
     static inline Server* inst = nullptr;
     CrowServer app;
 
     Server(
-        const std::filesystem::path& confDir
+        const std::filesystem::path& confDir,
+        Flags runtimeConfig
     );
     ~Server();
 
     void run();
+
+    const ServerConfig& getConfig() {
+        return cfg;
+    }
 
     CrowServer* operator->() {
         return &app;

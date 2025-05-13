@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <nlohmann/json.hpp>
 
@@ -36,7 +37,14 @@ struct ServerConfig {
      */
     std::string dbUsername = "jade";
 
+    std::filesystem::path thumbnailCacheDir = "./thumbnails";
+
     std::string getConnString();
+    void createDirectories() {
+        if (!std::filesystem::exists(thumbnailCacheDir)) {
+            std::filesystem::create_directories(thumbnailCacheDir);
+        }
+    }
 };
 
 inline void from_json(const nlohmann::json& i, ServerConfig& o) {
@@ -53,6 +61,9 @@ inline void from_json(const nlohmann::json& i, ServerConfig& o) {
     }
     if (i.contains("dbUsername")) {
         i.at("dbUsername").get_to(o.dbUsername);
+    }
+    if (i.contains("thumbnailCacheDir")) {
+        i.at("thumbnailCacheDir").get_to(o.thumbnailCacheDir);
     }
 }
 

@@ -50,7 +50,8 @@ void WebProvider::getRootIndex(Server* server, crow::request& req, crow::respons
     static ContextProvider::PageContext pageCtx {
         .pageTitle = "Ebooks | Jade",
         .pageDescription = "Jade - an eBook reader",
-        .pageFile = "index.mustache"
+        .pageFile = "index.mustache",
+        .includeSidebar = true
     };
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
@@ -74,7 +75,7 @@ void WebProvider::getLogin(Server* server, crow::request& req, crow::response& r
         .pageFile = "auth/login.mustache",
         .pageScripts = {
             "/static/js/auth.js"
-        }
+        },
     };
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(0, req, pageCtx, server);

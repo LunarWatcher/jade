@@ -106,11 +106,19 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
         res = JSONResponse{
             R"({"message": "you already have an account, wtf are you doing?"})"
         };
-        res.code = 400;
+        res.code = crow::BAD_REQUEST;
+        res.end();
         return;
     }
 
     SignupRequest data = nlohmann::json::parse(req.body);
+
+    if (data.username == "" || data.password == "") {
+        res = JSONMessageResponse("Username or password missing");
+        res.code = crow::BAD_REQUEST;
+        res.end();
+        return;
+    }
 
 
     server->pool->acquire<void>([&](auto& conn) {
