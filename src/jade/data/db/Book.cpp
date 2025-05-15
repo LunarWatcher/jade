@@ -4,14 +4,14 @@
 namespace jade {
 
 
-crow::json::wvalue Tag::toJson() {
+crow::json::wvalue Tag::toJson() const {
     return {
         {"Name", name},
         {"ID", tagId}
     };
 }
 
-crow::json::wvalue Series::toJson() {
+crow::json::wvalue Series::toJson() const {
     std::vector<crow::json::wvalue> bookData;
     std::transform(
        books.begin(), books.end(),
@@ -21,16 +21,18 @@ crow::json::wvalue Series::toJson() {
        }
     );
 
-    return {
+    crow::json::wvalue ret = {
         {"ID", id},
         {"Name", seriesName},
         {"Description", seriesDescription},
         {"Books", bookData}
     };
 
+
+    return ret;
 }
 
-crow::json::wvalue Book::toJson() {
+crow::json::wvalue Book::toJson() const {
     std::vector<crow::json::wvalue> tagData;
     std::transform(
        tags.begin(), tags.end(),
@@ -40,7 +42,7 @@ crow::json::wvalue Book::toJson() {
        }
     );
 
-    return {
+    crow::json::wvalue ret = {
         {"ID", id},
         {"Title", title},
         {"Description", description},
@@ -48,9 +50,18 @@ crow::json::wvalue Book::toJson() {
         {"Tags", tagData}
     };
 
+    // I really should look into inja
+    if (description == "") {
+        ret["Description"] = false;
+    }
+    if (isbn == "") {
+        ret["ISBN"] = false;
+    }
+
+    return ret;
 }
 
-crow::json::wvalue Collection::toJson() {
+crow::json::wvalue Collection::toJson() const {
     return {
         {"ID", id},
         {"Name", name},

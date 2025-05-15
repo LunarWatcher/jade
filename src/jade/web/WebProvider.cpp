@@ -4,6 +4,7 @@
 #include "jade/core/Typedefs.hpp"
 #include "jade/server/AuthWall.hpp"
 #include "jade/server/SessionMiddleware.hpp"
+#include "jade/util/Util.hpp"
 #include <jade/core/Macros.hpp>
 #include <jade/core/Server.hpp>
 
@@ -11,10 +12,19 @@ namespace jade {
 
 
 void WebProvider::init(Server* server) {
+    using namespace std::placeholders;
     CROW_ROUTE(server->app, "/")
         .methods(crow::HTTPMethod::GET)
         .CROW_MIDDLEWARES((server->app), NeedsAuthed)
         (JADE_CALLBACK_BINDING(getRootIndex));
+    CROW_ROUTE(server->app, "/books.html")
+        .methods(crow::HTTPMethod::GET)
+        .CROW_MIDDLEWARES((server->app), NeedsAuthed)
+        (JADE_CALLBACK_BINDING(getBooks));
+    CROW_ROUTE(server->app, "/books/<int>/details.html")
+        .methods(crow::HTTPMethod::GET)
+        .CROW_MIDDLEWARES((server->app), NeedsAuthed)
+        (std::bind(getBookDetails, server, _1, _2, _3));
 
     CROW_ROUTE(server->app, "/settings/system.html")
         .methods(crow::HTTPMethod::GET)
@@ -143,6 +153,77 @@ void WebProvider::getHealth(Server* server, crow::request& req, crow::response& 
 
     res = page.render(ctx);
     res.end();
+}
+
+void WebProvider::getBooks(Server* server, crow::request& req, crow::response& res) {
+    auto userCtx = server->app.get_context<MSessionMiddleware>(req);
+    static ContextProvider::PageContext pageCtx {
+        .pageTitle = "Library | Jade",
+        .pageDescription = "Ebook library",
+        .pageFile = "listings/books.mustache",
+        .includeSidebar = true,
+    };
+
+    auto pageIdStr = req.url_params.get("page");
+    size_t pageId = 0;
+
+    if (pageIdStr != nullptr) {
+        pageId = std::stoull(pageIdStr);
+    }
+
+
+    if (!server->lib->isBookPageNumberValid(pageId, 50)) {
+        res.body = "Invalid page index";
+        res.code = 400;
+        res.end();
+        return;
+    }
+
+    auto page = ContextProvider::getBaseTemplate();
+    auto ctx = ContextProvider::buildBaseContext(
+        ContextProvider::USER, 
+        req, pageCtx, server
+    );
+
+    ctx["Books"] = std::move(
+        Util::vec2json(server->lib->getBooks(pageId, 50))
+    );
+
+    res = page.render(ctx);
+    res.end();
+}
+
+void WebProvider::getBookDetails(Server* server, crow::request& req, crow::response& res, int bookID) {
+    auto userCtx = server->app.get_context<MSessionMiddleware>(req);
+    auto book = server->lib->getBook(bookID);
+
+    if (!book.has_value()) {
+        res.body = "Book not found";
+        res.code = 404;
+        res.end();
+        return;
+    }
+
+    static ContextProvider::PageContext pageCtx {
+        .pageTitle = book->title + " | Jade",
+        .pageDescription = "Ebook library",
+        .pageFile = "listings/book.mustache",
+        .includeSidebar = true,
+    };
+
+    auto page = ContextProvider::getBaseTemplate();
+    auto ctx = ContextProvider::buildBaseContext(
+        ContextProvider::USER, 
+        req, pageCtx, server
+    );
+
+    ctx["Book"] = std::move(
+        book->toJson()
+    );
+
+    res = page.render(ctx);
+    res.end();
+
 }
 
 }

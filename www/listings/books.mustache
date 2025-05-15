@@ -1,0 +1,9 @@
+<h1>Library</h1>
+
+{{>templates/filter.mustache}}
+
+<div class="book-listing flex-horizontal">
+    {{#Books}}
+    {{>templates/book.mustache}}
+    {{/Books}}
+</div>

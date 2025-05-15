@@ -43,6 +43,8 @@
     --background-fail: red;
 
     --background-code: #eaefea;
+
+    --standard-shadow: 2px 2px 4px #00000066;
 }
 
 * {
@@ -102,12 +104,12 @@ main {
 
 .flex-vertical {
     display: flex;
-    flex: 1 0 100%;
+    /*flex: 1 0 100%;*/
     flex-direction: column;
     gap: 4px;
 }
 
-.flex-vertical > * {
+.flex-vertical.grow > * {
     width: 100%;
 }
 
@@ -115,6 +117,8 @@ main {
     display: flex;
     flex: 1 0 auto;
     flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2px;
 }
 
 .center-items {
@@ -244,6 +248,10 @@ code {
     min-width: 100px;
     margin: 4px;
     border-radius: 8px;
+    position: sticky;
+    max-height: 100vh;
+    top: 0px;
+    overflow-y: auto;
 }
 .sidebar ul {
     flex-direction: column;
@@ -261,5 +269,97 @@ code {
         grid-template-rows: auto auto 1fr auto;
     }
 
+    .sidebar {
+        position: unset;
+    }
+
+}
+
+.book-listing {
+    width: 100%;
+    gap: 4px;
+
+    align-items: stretch;
+}
+
+.book {
+    flex: 0 1 200px;
+    width: 200px;
+    gap: 0px;
+}
+
+.book:hover {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.shadow:hover {
+    box-shadow: var(--standard-shadow);
+    transition: linear 150ms;
+}
+
+.book-box {
+    padding: 8px;
+    background-color: var(--background-secondary);
+    color: var(--foreground-secondary);
+    height: 100%;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    flex: 1 0 auto;
+}
+
+.book img {
+    height: 250px;
+    width: inherit;
+    align-self: center;
+}
+.book * {
+    max-width: 100%;
+}
+
+.book p {
+    overflow-wrap: break-word;
+}
+
+.p-nopad p {
+    margin: 0;
+}
+
+.flex-grow {
+    flex: 1 1 auto;
+}
+.flex-shrink {
+    flex: 0 1 auto;
+}
+
+.flex-a-end {
+    align-self: flex-end;
+}
+
+.flex-nogap {
+    gap: 0px;
+}
+
+.detail-section img {
+    max-height: 250px;
+}
+
+.disabled {
+    color: var(--disabled-background-colour);
+}
+
+.p8 {
+    padding: 8px;
+}
+
+
+
+.book-details .header {
+    margin-bottom: 8px;
+}
+
+.book-details .shadow:hover {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 

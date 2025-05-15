@@ -14,7 +14,17 @@ void BookAPI::init(Server *server) {
 }
 
 void BookAPI::getImage(Server* server, crow::request& req, crow::response& res, int bookID) {
-    spdlog::info("Image requested for {}", bookID);
+    auto theoreticalImgPath = server->getConfig().thumbnailCacheDir / (std::to_string(bookID) + ".jpg");
+    if (!std::filesystem::exists(theoreticalImgPath)) {
+        res.code = 404;
+        res.end();
+        return;
+    }
+
+    res.set_static_file_info(theoreticalImgPath.string());
+    res.set_header("Cache-Control", "public, max-age=2592000");
+    res.set_header("Age", "0");
+    res.end();
 }
 
 }

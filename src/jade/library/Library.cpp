@@ -8,6 +8,7 @@
 #include <stc/StringUtil.hpp>
 
 #include <jade/core/Server.hpp>
+#include <string_view>
 
 namespace jade {
 
@@ -40,6 +41,10 @@ void Library::scan() {
         spdlog::debug("Index starting");
         for (auto& [id, source] : sources) {
             auto& dir = source.dir;
+            if (!std::filesystem::exists(dir)) {
+                spdlog::error("Index failure: {} does not exist (bad mount?)", dir.string());
+                continue;
+            }
             // Under ext4, adding or updating a file results in last_write_time being updated.
             if (auto newUpdate = std::filesystem::last_write_time(dir);
                 newUpdate > source.lastUpdate)
@@ -51,6 +56,22 @@ void Library::scan() {
                 spdlog::debug("{} is up to date", source.dir.string());
             }
         }
+
+        bookCount = 0;
+        serv->pool->acquire<void>([this](auto& conn) {
+            pqxx::work w(conn);
+
+            for (auto& [id, source] : sources) {
+                auto res = w.query1<int64_t>(
+                    "SELECT COUNT(*) FROM Jade.Books WHERE LibraryID = $1",
+                    pqxx::params {
+                        id
+                    }
+                );
+                source.bookCount = std::get<0>(res);
+                bookCount += source.bookCount;
+            }
+        });
 
         if (sources.size() == 0) {
             spdlog::info("Scanner: No libraries exist to scan");
@@ -205,6 +226,11 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
             //}
         )) {
             if (!std::filesystem::exists(dir / filename)) {
+                auto thumbnail = serv->getConfig().thumbnailCacheDir / (std::to_string(bookId) + ".jpg");
+                if (std::filesystem::exists(thumbnail)) {
+                    std::filesystem::remove(thumbnail);
+                }
+
                 w.exec("DELETE FROM Jade.Books WHERE BookID = $1", pqxx::params {
                     bookId
                 });
@@ -217,11 +243,12 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
 }
 
 void Library::generateThumbnail(int64_t id, const std::filesystem::path& file) {
-    auto output = serv->getConfig().thumbnailCacheDir / (std::to_string(id) + ".png");
+    auto output = serv->getConfig().thumbnailCacheDir / (std::to_string(id) + ".jpg");
 
     int code;
     stc::syscommand(std::vector {
-        metaCommand.c_str(), file.string().c_str(),
+        metaCommand.c_str(),
+        file.string().c_str(),
         ("--get-cover=" + output.string()).c_str()
     }, &code);
     if (code != 0) {
@@ -230,6 +257,95 @@ void Library::generateThumbnail(int64_t id, const std::filesystem::path& file) {
         spdlog::debug("Generated thumbnail for {}", file.string());
     }
 
+}
+
+std::vector<Book> Library::getBooks(size_t page, size_t pagesize) {
+    return serv->pool->acquire<std::vector<Book>>([&](auto& conn) -> std::vector<Book> {
+        pqxx::work w(conn);
+        std::vector<Book> out;
+
+        // TODO: include tags (do I need a second query, or can I inline?)
+        auto rows = w.query<
+            int64_t, std::string_view, std::string_view, std::string_view
+        >(R"(
+            SELECT 
+                BookID,
+                Title,
+                COALESCE(Description, ''), 
+                COALESCE(ISBN, '')
+            FROM Jade.Books
+            ORDER BY BookID DESC
+            LIMIT $1
+            OFFSET $2
+        )", pqxx::params {
+            pagesize,
+            page * pagesize
+        });
+
+        for (auto& [id, title, description, isbn] : rows) {
+            out.push_back(Book {
+                .id = id,
+                .title = std::string{ title },
+                .description = std::string{ description },
+                .isbn = std::string{ isbn },
+            });
+        }
+
+        return out;
+    });
+}
+std::vector<Collection> Library::getCollections(size_t page, size_t pagesize) {
+    return {};
+}
+std::vector<Book> Library::getCollection(int64_t collectionId, size_t page, size_t pagesize) {
+    return {};
+}
+std::vector<Series> Library::getAllSeries(size_t page, size_t pagesize) {
+    return {};
+}
+Series Library::getSeries(int64_t seriesId, size_t page, size_t pagesize) {
+    return {};
+}
+
+std::optional<Book> Library::getBook(int64_t bookID) {
+    return serv->pool->acquire<std::optional<Book>>([&](auto& conn) -> std::optional<Book> {
+        pqxx::work w(conn);
+
+        auto row = w.query01<std::string_view, std::string_view, std::string_view>(
+            R"(
+            SELECT 
+                Title,
+                COALESCE(Description, ''), 
+                COALESCE(ISBN, '')
+            FROM Jade.Books WHERE BookID = $1
+            )",
+            pqxx::params {
+                bookID
+            }
+        );
+
+        if (!row) {
+            return std::nullopt;
+        }
+
+        return Book {
+            bookID,
+            std::string { std::get<0>(*row) },
+            std::string { std::get<1>(*row) },
+            std::string { std::get<2>(*row) },
+        };
+    });
+}
+
+bool Library::isBookPageNumberValid(size_t page, size_t pagesize, std::optional<int64_t> libraryId) {
+    auto offset = page * pagesize;
+    if (libraryId.has_value()) {
+        // TODO: >=?
+        return sources.at(*libraryId).bookCount > offset;
+    }
+
+    // TODO: >=?
+    return bookCount > offset;
 }
 
 }

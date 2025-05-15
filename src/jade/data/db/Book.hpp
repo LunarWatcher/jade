@@ -1,7 +1,6 @@
 #pragma once
 
 #include "crow/json.h"
-#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -11,7 +10,7 @@ struct Tag {
     std::string name;
     int64_t tagId;
 
-    crow::json::wvalue toJson();
+    crow::json::wvalue toJson() const;
 };
 
 struct Book;
@@ -21,7 +20,7 @@ struct Series {
     std::string seriesDescription;
     std::vector<Book> books;
 
-    crow::json::wvalue toJson();
+    crow::json::wvalue toJson() const;
 };
 
 struct Book {
@@ -32,7 +31,7 @@ struct Book {
     
     std::vector<Tag> tags;
 
-    crow::json::wvalue toJson();
+    crow::json::wvalue toJson() const;
 };
 
 /**
@@ -44,7 +43,7 @@ struct Collection {
     std::string name;
     std::string description;
 
-    crow::json::wvalue toJson();
+    crow::json::wvalue toJson() const;
 };
 
 

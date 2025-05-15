@@ -1,6 +1,8 @@
 #pragma once
 
+#include "jade/data/db/Book.hpp"
 #include "jade/health/HealthCheck.hpp"
+#include <optional>
 #include <pqxx/pqxx>
 #include <filesystem>
 #include <shared_mutex>
@@ -17,6 +19,8 @@ struct Source {
         // will therefore fail the update check
         std::chrono::clock_cast<std::chrono::file_clock>(std::chrono::system_clock::time_point())
     };
+
+    int64_t bookCount = 0;
 
     bool isValid() {
         return std::filesystem::is_directory(dir);
@@ -47,6 +51,8 @@ private:
         // KF8 and FB2 omitted because I've never heard about them, nor seen them
     };
     std::unordered_map<int64_t, Source> sources;
+    int64_t bookCount;
+    
     std::shared_mutex m;
 
     std::thread runner;
@@ -82,6 +88,41 @@ public:
     }
 
     std::vector<health::HealthResult> checkHealth() override;
+
+    /**
+     * Returns a vector of Books. 
+     *
+     * No sorting or filtering is currently supported. The default sort is descending by BookID, meaning (theoretically)
+     * the most recently uploaded books are first.
+     */
+    std::vector<Book> getBooks(size_t page, size_t pagesize = 50);
+
+    /**
+     * Returns a vector of Collections.
+     *
+     * Like getBooks, no sorting or filtering is currently supported. The default sort is descending by CollectionID,
+     * meaning the most recently created collections are first
+     */
+    std::vector<Collection> getCollections(size_t page, size_t pagesize = 50);
+
+    /**
+     * Returns a vector of books in a given collection.
+     */
+    std::vector<Book> getCollection(int64_t collectionId, size_t page, size_t pagesize = 50);
+
+    /**
+     * Returns a vector of series without the books in them. Useful for listing series
+     */
+    std::vector<Series> getAllSeries(size_t page, size_t pagesize = 50);
+
+    /**
+     * Returns a single Series with its Books populated.
+     */
+    Series getSeries(int64_t seriesId, size_t page, size_t pagesize = 50);
+
+    std::optional<Book> getBook(int64_t bookID);
+
+    bool isBookPageNumberValid(size_t page, size_t pagesize, std::optional<int64_t> libraryId = std::nullopt);
 
 };
 

@@ -1,0 +1,26 @@
+<h1>{{Book.Title}}</h1>
+
+
+<div class="book-details p-nopad">
+    <div class="header style-secondary flex-vertical">
+        <p class="flex-a-end flex-vertical"><a class="p8" href="#" onclick="editBook({{Book.ID}})">
+            ✎
+        </a>
+    </div>
+
+    <div class="detail-section flex-horizontal">
+        <aside class="flex-shrink">
+            <a class="flex-vertical shadow flex-nogap" href="/books/{{Book.ID}}/reader.html">
+                <img src="/api/books/{{Book.ID}}/cover" />
+                <p class="book-box">Read</p>
+            </a>
+        </aside>
+        {{#Book.Description}}
+        <p>{{Book.Description}}</p>
+        {{/Book.Description}}
+        {{^Book.Description}}
+        <p class="disabled">This book does not currently have a description</p>
+        {{/Book.Description}}
+    </div>
+
+</div>

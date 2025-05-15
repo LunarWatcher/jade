@@ -1,0 +1,15 @@
+<div class="book shadow p-nopad flex-vertical">
+    <a href="/books/{{ID}}/details.html" class="flex-vertical">
+        <img src="/api/books/{{ ID }}/cover" />
+    </a>
+    <a href="/books/{{ID}}/details.html" class="flex-horizontal">
+        <div class="book-box style-secondary">
+            <p>{{ Title }}</p>
+            <p>
+            {{#Tags}}
+                <span class="tag">{{ . }}</span>
+            {{/Tags}}
+            </p>
+        </div>
+    </a>
+</div>
