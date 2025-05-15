@@ -204,7 +204,7 @@ void WebProvider::getBookDetails(Server* server, crow::request& req, crow::respo
         return;
     }
 
-    static ContextProvider::PageContext pageCtx {
+    ContextProvider::PageContext pageCtx {
         .pageTitle = book->title + " | Jade",
         .pageDescription = "Ebook library",
         .pageFile = "listings/book.mustache",
