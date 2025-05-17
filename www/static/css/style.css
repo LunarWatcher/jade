@@ -80,7 +80,7 @@ body:not(:has(>.sidebar)) {
   grid-template-rows: auto 1fr auto;
 }
 body:has(>.sidebar) {
-  grid-template-areas: "header header" "sidebar main" "footer footer";
+  grid-template-areas: "header header" "sidebar main" "footer main";
   grid-template-columns: 2fr 6fr;
   grid-template-rows: auto 1fr auto;
 }
@@ -93,6 +93,10 @@ header, footer {
 
 footer {
     grid-area: footer;
+    height: 100%;
+    width: 100%;
+
+    padding: 8px;
 }
 
 main {
@@ -117,6 +121,13 @@ main {
     display: flex;
     flex: 1 0 auto;
     flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+.flex-horizontal-rev {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: row-reverse;
     flex-wrap: wrap;
     gap: 2px;
 }
@@ -249,7 +260,7 @@ code {
     margin: 4px;
     border-radius: 8px;
     position: sticky;
-    max-height: 100vh;
+    max-height: 70vh;
     top: 0px;
     overflow-y: auto;
 }
@@ -332,10 +343,6 @@ code {
     flex: 0 1 auto;
 }
 
-.flex-a-end {
-    align-self: flex-end;
-}
-
 .flex-nogap {
     gap: 0px;
 }
@@ -361,5 +368,57 @@ code {
 .book-details .shadow:hover {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+}
+
+
+.overlay-container {
+    position: relative;
+}
+
+.default-hide {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+select {
+    background-color: var(--background-primary);
+    color: var(--foreground-primary);
+    padding: 8px;
+    border: none;
+    border-radius: 0px;
+}
+
+*:disabled {
+    background-color: var(--disabled-background-colour);
+    color: var(--disabled-foreground-colour);
+}
+
+.popup-close-special {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
+details {
+    border: 2px solid var(--background-secondary);
+}
+
+summary {
+    padding: 8px;
+    background: var(--background-secondary);
+    color: var(--foreground-secondary);
+}
+
+details > div {
+    padding: 8px;
+}
+
+details[open] summary {
+    border-bottom: 2px solid var(--background-secondary);
 }
 

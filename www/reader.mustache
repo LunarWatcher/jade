@@ -1,0 +1,67 @@
+<div class="flex-vertical overlay-container" id="reader-root">
+    <div id="reader-overlay" class="overlayer"></div> 
+    <div id="sidebar-header" class="toolbar flex-horizontal">
+        <button id="sidebar-button" aria-label="Show sidebar" class="settings-button">↦</button>
+        <button id="menu-button" aria-label="Show settings" class="settings-button">⚙</button>
+        <button id="help-button" aria-label="Show help" class="settings-button">?</button>
+        <h1>Reading: <b>{{Book.Title}}</b></h1>
+        <div id="menu-container" class="default-hide flex-vertical popover">
+            <label for="setting-flow-mode">Reader mode</label>
+            <select id="setting-flow-mode" name="setting-flow-mode">
+                <option value="scrolled">Scrolled</option>
+                <option value="paginated" class="setting-needsflexible">Paginated</option>
+            </select>
+
+            <label for="setting-spread-mode">Spread</label>
+            <select id="setting-spread-mode" name="setting-spread-mode" class="setting-needsnotflexible">
+                <option value="auto">Auto</option>
+                <option value="both">Two pages</option>
+                <option value="portrait">Single</option>
+            </select>
+            <br />
+            <button id="close-settings">Close</button>
+        </div>
+        <div id="help-container" class="default-hide flex-vertical popover">
+            <h2>Keyboard shortcuts</h2>
+            <p>Note: All directional buttons behave identically regardless of whether or not the book you're reading is RTL. Right means "go forward", left means "go backwards",
+                regardless of the actual scroll direction of the book. Also note that both navigating left and right can also scroll</p>
+            <ul>
+                <li><code>Escape</code>: Close the currently open sidebar or popup</li>
+                <li><code>h</code>/<code>Left</code>: Navigate left</li>
+                <li><code>l</code>/<code>Right</code>: Navigate right</li>
+            </ul>
+            <button id="close-help">Close</button>
+        </div>
+    </div>
+    <aside id="reader-sidebar" class="flex-vertical">
+        <button id="close-sidebar" class="popup-close-special">✕</button>
+        <img id="sidebar-cover" />
+        <h2>Table of Contents</h2>
+        <nav id="sidebar-toc" class="flex-vertical">
+            <span id="no-toc">No table of contents available for this file</span>
+        </nav>
+    </aside>
+    <foliate-view></foliate-view>
+    <div id="reader-navbar" class="toolbar flex-horizontal">
+        <button id="left-button" aria-label="Go left">
+            <svg class="icon" width="24" height="24" >
+                <path d="M 15 6 L 9 12 L 15 18"/>
+            </svg>
+        </button>
+        <input id="progress-slider" type="range" min="0" max="1" step="any" list="tick-marks">
+        <datalist id="tick-marks"></datalist>
+        <button id="right-button" aria-label="Go right">
+            <svg class="icon" width="24" height="24" >
+                <path d="M 9 6 L 15 12 L 9 18"/>
+            </svg>
+        </button>
+    </div>
+</div>
+<script type="module" defer>
+import {open} from "/static/js/reader.js";
+open("/api/books/{{Book.ID}}/download")
+    .catch(e => {
+        showDialog("Failed to load the book. Download it from the details page and read it in a different reader, or try again later");
+        console.error(e)
+    });
+</script>

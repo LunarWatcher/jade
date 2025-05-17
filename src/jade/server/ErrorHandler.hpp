@@ -22,13 +22,10 @@ public:
     void before_handle(crow::request& req, crow::response&, context&) {}
     void after_handle(crow::request& req, crow::response& res, context&) {
         auto message = res.body;
-        if (message == "") {
-            message = "Error: HTTP " + std::to_string(res.code);
-        }
         if (res.code >= 400) {
             if (req.url.starts_with("/api")) {
                 // TODO: this isn't _great_ when the message is auto-generated.
-                if (res.code == 404)  {
+                if (res.code == 404 && message == "")  {
                     message = "invalid endpoint";
                 } else if (res.code < 500) {
                     return;
@@ -38,6 +35,9 @@ public:
                     {"message", message},
                 }.dump();
             } else {
+                if (message == "") {
+                    message = "Error: HTTP " + std::to_string(res.code);
+                }
                 static ContextProvider::PageContext ctx {
                     .pageTitle = "Error",
                     .pageDescription = "An error happened",

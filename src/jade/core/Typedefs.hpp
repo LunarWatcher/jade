@@ -1,6 +1,7 @@
 #pragma once
 
 #include "jade/server/AuthWall.hpp"
+#include "jade/server/CacheHelper.hpp"
 #include "jade/server/ErrorHandler.hpp"
 #include "jade/server/SessionMiddleware.hpp"
 #include <crow.h>
@@ -12,10 +13,11 @@ namespace jade {
 
 using CrowServer = crow::Crow<
     // Global handlers {{{
+    CacheHelper,
     SecurityMetaHeaders,
-    ErrorHandler,
     crow::CookieParser,
     MSessionMiddleware,
+    ErrorHandler,
     // }}}
     // Local handlers {{{
 

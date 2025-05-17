@@ -21,10 +21,17 @@ void WebProvider::init(Server* server) {
         .methods(crow::HTTPMethod::GET)
         .CROW_MIDDLEWARES((server->app), NeedsAuthed)
         (JADE_CALLBACK_BINDING(getBooks));
+    CROW_ROUTE(server->app, "/licenses.html")
+        .methods(crow::HTTPMethod::GET)
+        (JADE_CALLBACK_BINDING(getLicenses));
     CROW_ROUTE(server->app, "/books/<int>/details.html")
         .methods(crow::HTTPMethod::GET)
         .CROW_MIDDLEWARES((server->app), NeedsAuthed)
         (std::bind(getBookDetails, server, _1, _2, _3));
+    CROW_ROUTE(server->app, "/books/<int>/reader.html")
+        .methods(crow::HTTPMethod::GET)
+        .CROW_MIDDLEWARES((server->app), NeedsAuthed)
+        (std::bind(getBookReader, server, _1, _2, _3));
 
     CROW_ROUTE(server->app, "/settings/system.html")
         .methods(crow::HTTPMethod::GET)
@@ -224,6 +231,56 @@ void WebProvider::getBookDetails(Server* server, crow::request& req, crow::respo
     res = page.render(ctx);
     res.end();
 
+}
+
+void WebProvider::getBookReader(Server* server, crow::request& req, crow::response& res, int bookID) {
+    auto userCtx = server->app.get_context<MSessionMiddleware>(req);
+    auto book = server->lib->getBook(bookID);
+
+    if (!book.has_value()) {
+        res.body = "Book not found";
+        res.code = 404;
+        res.end();
+        return;
+    }
+
+    ContextProvider::PageContext pageCtx {
+        .pageTitle = book->title + " | Jade Reader View",
+        .pageDescription = "Ebook library",
+        .pageFile = "reader.mustache",
+        .pageCSS = {"/static/css/foliate.css"}
+    };
+
+    auto page = ContextProvider::getBaseTemplate();
+    auto ctx = ContextProvider::buildBaseContext(
+        ContextProvider::USER, 
+        req, pageCtx, server
+    );
+
+    ctx["Book"] = std::move(
+        book->toJson()
+    );
+
+    res = page.render(ctx);
+    res.end();
+
+}
+
+void WebProvider::getLicenses(Server* server, crow::request& req, crow::response& res) {
+    ContextProvider::PageContext pageCtx {
+        .pageTitle = "Open-source licenses | Jade Reader View",
+        .pageDescription = "Open-source licenses",
+        .pageFile = "licenses.mustache",
+    };
+
+    auto page = ContextProvider::getBaseTemplate();
+    auto ctx = ContextProvider::buildBaseContext(
+        ContextProvider::USER, 
+        req, pageCtx, server
+    );
+
+    res = page.render(ctx);
+    res.end();
 }
 
 }

@@ -22,6 +22,7 @@ add_library(jadesrc STATIC
     jade/library/Library.cpp
 
     jade/server/BaseMiddlewares.cpp
+    jade/server/CacheHelper.cpp
     jade/server/SessionMiddleware.cpp
 
     jade/util/ResponseUtil.cpp

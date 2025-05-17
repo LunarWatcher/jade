@@ -2,9 +2,12 @@
 
 
 <div class="book-details p-nopad">
-    <div class="header style-secondary flex-vertical">
-        <p class="flex-a-end flex-vertical"><a class="p8" href="#" onclick="editBook({{Book.ID}})">
-            ✎
+    <div class="header style-secondary flex-horizontal-rev">
+        <a class="p8" href="#" onclick="editBook({{Book.ID}})">
+            ✏️
+        </a>
+        <a class="p8" href="/api/books/{{Book.ID}}/download" target="_blank">
+            📥
         </a>
     </div>
 

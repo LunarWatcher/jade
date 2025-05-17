@@ -6,6 +6,9 @@
     <title>{{Page.Title}}</title>
 
     <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    {{#Page.CSS}}
+    <link rel="stylesheet" type="text/css" href="{{.}}" />
+    {{/Page.CSS}}
 
     <script src="/static/js/global.js" charset="utf-8"></script>
     {{#Page.Scripts}}

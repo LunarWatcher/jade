@@ -1,6 +1,7 @@
 #include "Library.hpp"
 #include "jade/health/HealthCheck.hpp"
 #include "spdlog/spdlog.h"
+#include <cctype>
 #include <filesystem>
 #include <iterator>
 
@@ -157,13 +158,10 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
                 file.path(),
                 dir
             );
-            auto ext = path.extension().string();
-            std::transform(ext.begin(), ext.end(), ext.begin(), [](const auto& ch) {
-                return std::tolower(ch);
-            });
+
             
-            if (std::find(SUPPORTED_EXTENSIONS.begin(), SUPPORTED_EXTENSIONS.end(), ext) == SUPPORTED_EXTENSIONS.end()) {
-                spdlog::debug("{} is not supported ({} is not a valid extension)", path.string(), ext);
+            if (!validateExtension(path).has_value()) {
+                spdlog::warn("{} is not supported (invalid extension)", path.string());
                 continue;
             }
 
@@ -311,12 +309,14 @@ std::optional<Book> Library::getBook(int64_t bookID) {
     return serv->pool->acquire<std::optional<Book>>([&](auto& conn) -> std::optional<Book> {
         pqxx::work w(conn);
 
-        auto row = w.query01<std::string_view, std::string_view, std::string_view>(
+        auto row = w.query01<std::string_view, std::string_view, std::string_view, std::string_view, int64_t>(
             R"(
             SELECT 
                 Title,
                 COALESCE(Description, ''), 
-                COALESCE(ISBN, '')
+                COALESCE(ISBN, ''),
+                FileName,
+                LibraryID
             FROM Jade.Books WHERE BookID = $1
             )",
             pqxx::params {
@@ -333,8 +333,21 @@ std::optional<Book> Library::getBook(int64_t bookID) {
             std::string { std::get<0>(*row) },
             std::string { std::get<1>(*row) },
             std::string { std::get<2>(*row) },
+            std::string { sources.at(std::get<4>(*row)).dir / std::get<3>(*row) },
         };
     });
+}
+
+std::optional<BookType> Library::validateExtension(const std::filesystem::path& p) {
+    auto ext = p.extension().string();
+    std::transform(ext.cbegin(), ext.cend(), ext.begin(), [](auto ch) { return std::tolower(ch); });
+
+    auto it = SUPPORTED_EXTENSIONS.find(ext);
+    if (it == SUPPORTED_EXTENSIONS.end()) {
+        return std::nullopt;
+    }
+
+    return it->second;
 }
 
 bool Library::isBookPageNumberValid(size_t page, size_t pagesize, std::optional<int64_t> libraryId) {

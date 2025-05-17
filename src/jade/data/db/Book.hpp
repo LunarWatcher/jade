@@ -28,6 +28,7 @@ struct Book {
     std::string title;
     std::string description;
     std::string isbn;
+    std::filesystem::path fullPath;
     
     std::vector<Tag> tags;
 
