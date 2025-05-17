@@ -19,8 +19,6 @@
     --regular-background-colour: white;
     --regular-text-colour: black;
 
-    /* Default colour mixing */
-    
     --background-primary: var(--primary-colour);
     --foreground-primary: black;
     --background-primary-active: color-mix(in srgb, var(--primary-colour), black 10%);

@@ -4,6 +4,7 @@
         <button id="sidebar-button" aria-label="Show sidebar" class="settings-button">↦</button>
         <button id="menu-button" aria-label="Show settings" class="settings-button">⚙</button>
         <button id="help-button" aria-label="Show help" class="settings-button">?</button>
+        <button id="fullscreen-button" aria-label="Toggle fullscreen" class="settings-button">⛶</button>
         <h1>Reading: <b>{{Book.Title}}</b></h1>
         <div id="menu-container" class="default-hide flex-vertical popover">
             <label for="setting-flow-mode">Reader mode</label>
@@ -14,7 +15,7 @@
 
             <label for="setting-spread-mode">Spread</label>
             <select id="setting-spread-mode" name="setting-spread-mode" class="setting-needsnotflexible">
-                <option value="auto">Auto</option>
+                <option value="center">Auto</option>
                 <option value="both">Two pages</option>
                 <option value="portrait">Single</option>
             </select>
@@ -22,15 +23,15 @@
             <button id="close-settings">Close</button>
         </div>
         <div id="help-container" class="default-hide flex-vertical popover">
+            <button id="close-help">Close</button>
             <h2>Keyboard shortcuts</h2>
             <p>Note: All directional buttons behave identically regardless of whether or not the book you're reading is RTL. Right means "go forward", left means "go backwards",
                 regardless of the actual scroll direction of the book. Also note that both navigating left and right can also scroll</p>
             <ul>
-                <li><code>Escape</code>: Close the currently open sidebar or popup</li>
+                <li><code>Escape</code> (non-fullscreen only)/<code>e</code>: Close the currently open sidebar or popup</li>
                 <li><code>h</code>/<code>Left</code>: Navigate left</li>
                 <li><code>l</code>/<code>Right</code>: Navigate right</li>
             </ul>
-            <button id="close-help">Close</button>
         </div>
     </div>
     <aside id="reader-sidebar" class="flex-vertical">

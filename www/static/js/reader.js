@@ -16,7 +16,7 @@ const getCSS = ({ spacing, justify, hyphenate }) => `
         hanging-punctuation: allow-end last;
         widows: 2;
     }
-    /* prevent the above from overriding the align attribute */
+
     [align="left"] { text-align: left; }
     [align="right"] { text-align: right; }
     [align="center"] { text-align: center; }
@@ -59,6 +59,9 @@ class Reader {
         hyphenate: true,
     }
 
+    expandIcon = "⛶";
+    shrinkIcon = "";
+
     rootElem = /** @type {HTMLElement} */ (document.getElementById("reader-root"));
 
     sidebar = /** @type {HTMLElement} */ (document.getElementById("reader-sidebar"));
@@ -88,6 +91,8 @@ class Reader {
     helpButton = /** @type {HTMLButtonElement} */ (document.getElementById("help-button"));
     closeHelpContainer = /** @type {HTMLButtonElement} */ (document.getElementById("close-help"));
 
+    fullscreenBtn = /** @type {HTMLButtonElement} */ (document.getElementById("fullscreen-button"));
+
     currElem = /** @type {HTMLElement | null}*/ (null);
 
     constructor() {
@@ -101,21 +106,6 @@ class Reader {
         });
         this.dimmingOverlay.addEventListener('click', () => this.closeSidebar())
 
-        this.menuButton.addEventListener('click', (ev) => {
-            ev.stopPropagation();
-            this.setFocus(this.menuContainer);
-        });
-        this.helpButton.addEventListener('click', (ev) => {
-            ev.stopPropagation();
-            this.setFocus(this.helpContainer);
-        });
-
-        this.closeSettingsButton.addEventListener("click", () => {
-            this.setFocus(null);
-        });
-        this.closeHelpContainer.addEventListener("click", () => {
-            this.setFocus(null);
-        });
 
         document.addEventListener("click", ev => {
             if (ev.target != null 
@@ -123,15 +113,17 @@ class Reader {
                 && ev.target != this.currElem
                 && !this.currElem.contains(ev.target)
             ) {
-                console.log("Click outside container");
-                console.log(this.currElem);
-                console.log(ev.target); 
                 this.setFocus(null);
             }
         });
 
-        this.setupHelp();
+        this.initFSButton();
 
+        this.registerPopupButton(this.helpButton, this.helpContainer);
+        this.registerPopupCloseButton(this.closeHelpContainer);
+
+        this.registerPopupButton(this.menuButton, this.menuContainer);
+        this.registerPopupCloseButton(this.closeSettingsButton);
     }
 
     closeSidebar() {
@@ -165,11 +157,6 @@ class Reader {
         }
     }
 
-    refreshLayout() {
-        this.view?.renderer.goLeft();
-        this.view?.renderer.goRight();
-    }
-
     setupViewMode(/** @type {Boolean} */isFlexible) {
         this.rendererChangeListener(this.flowModeContainer, "flow");
         this.rendererChangeListener(this.spreadModeContainer, "spread");
@@ -194,7 +181,7 @@ class Reader {
         filter = null
     ) {
         const setAttr = () => {
-            this.view?.renderer.setAttribute(
+            this.view?.setAttribute(
                 property, 
                 (() => {
                     if (filter != null) {
@@ -241,8 +228,8 @@ class Reader {
             book.rendition.layout != "pre-paginated"
         );
 
-        this.sidebarHeader.style.visibility = 'visible'
-        this.readerNavbar.style.visibility = 'visible'
+        this.sidebarHeader.style.visibility = 'visible';
+        this.readerNavbar.style.visibility = 'visible';
         this.leftButton.addEventListener('click', () => this.view.goLeft())
         this.rightButton.addEventListener('click', () => this.view.goRight())
 
@@ -276,17 +263,14 @@ class Reader {
     }
     #handleKeydown(/** @type {KeyboardEvent} */ event) {
         const k = event.key;
-        if (k === 'ArrowLeft' || k === 'h') {
+        if (k === "ArrowLeft" || k === "h") {
             this.view?.goLeft();
-        } else if (k === 'ArrowRight' || k === 'l') {
+        } else if (k === "ArrowRight" || k === "l") {
             this.view?.goRight();
-        } else if (k == "Escape") {
+        } else if (k == "Escape" || k == "e") {
             this.closeSidebar();
             this.setFocus(null);
         }
-    }
-    setupHelp() {
-
     }
     #onLoad({ detail: { doc } }) {
         doc.addEventListener('keydown', this.#handleKeydown.bind(this))
@@ -301,6 +285,36 @@ class Reader {
         this.progressSlider.value = fraction
         this.progressSlider.title = `${percent} · ${loc}`
         if (tocItem?.href) this.#tocView?.setCurrentHref?.(tocItem.href)
+    }
+
+    registerPopupButton(/** @type {HTMLButtonElement} */ elem, /** @type {HTMLElement} */ container) {
+        elem.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            this.setFocus(container);
+        });
+    }
+
+    registerPopupCloseButton(/** @type {HTMLButtonElement} */ elem) {
+        elem.addEventListener("click", () => {
+            this.setFocus(null);
+        });
+    }
+
+    initFSButton() {
+        if (document.fullscreenEnabled) {
+            this.fullscreenBtn.addEventListener("click", () => {
+                if (document.fullscreenElement == null) {
+                    this.rootElem.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+            this.fullscreenBtn.addEventListener("fullscreenchange", () => {
+                this.fullscreenBtn.innerText = (document.fullscreenElement != null) ? this.expandIcon : this.shrinkIcon;
+            });
+        } else {
+            this.fullscreenBtn.style.visibility = "collapse";
+        }
     }
 }
 

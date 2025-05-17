@@ -1,5 +1,7 @@
 #reader-root {
     height: 100vh;
+    background-color: var(--regular-background-colour);
+    color: var(--regular-text-colour);
 }
 
 #reader-root > * {
@@ -39,7 +41,8 @@ main {
     max-height: 100%;
     overflow-y: auto;
     padding: 8px;
-    background-color: white;
+    background-color: var(--regular-background-colour);
+    color: var(--regular-text-colour);
     border: 2px solid var(--background-secondary);
     border-radius: 4px;
     margin-left: 8px;
@@ -55,7 +58,8 @@ main {
 
     width: 50vw;
     height: 100%;
-    background: white;
+    background-color: var(--regular-background-colour);
+    color: var(--regular-text-colour);
 
 }
 #reader-sidebar button {
