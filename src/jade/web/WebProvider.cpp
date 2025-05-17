@@ -248,7 +248,8 @@ void WebProvider::getBookReader(Server* server, crow::request& req, crow::respon
         .pageTitle = book->title + " | Jade Reader View",
         .pageDescription = "Ebook library",
         .pageFile = "reader.mustache",
-        .pageCSS = {"/static/css/foliate.css"}
+        .pageCSS = {"/static/css/foliate.css"},
+        .hideFooter = true
     };
 
     auto page = ContextProvider::getBaseTemplate();

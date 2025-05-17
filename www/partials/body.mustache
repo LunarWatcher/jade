@@ -9,6 +9,8 @@
         {{#Special.Sidebar}}
         {{>partials/sidebar.mustache}}
         {{/Special.Sidebar}}
+        {{^Special.HideFooter}}
         {{>partials/footer.mustache}}
+        {{/Special.HideFooter}}
     </body>
 </html>

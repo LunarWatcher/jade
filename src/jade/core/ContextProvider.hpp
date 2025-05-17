@@ -31,6 +31,7 @@ struct PageContext {
     std::vector<crow::json::wvalue> pageCSS = {};
 
     bool includeSidebar = false;
+    bool hideFooter = false;
 
     /**
      * DO NOT FILL! Place all fields before this. This field will be auto-populated.
@@ -59,6 +60,7 @@ struct PageContext {
 
             generated["Special"] = {
                 {"Sidebar", this->includeSidebar},
+                {"HideFooter", this->hideFooter}
             };
         }
 
