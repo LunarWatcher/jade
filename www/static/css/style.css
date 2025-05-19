@@ -38,7 +38,8 @@
     --disabled-foreground-colour: white;
 
     --background-success: green;
-    --background-fail: red;
+    --background-danger: #F32013;
+    --foreground-danger: black;
 
     --background-code: #eaefea;
 
@@ -67,7 +68,6 @@ body {
     margin: 0;
 
     display: grid;
-    grid-template-rows: auto 1fr auto;
     min-height: 100vh;
     margin: 0;
 }
@@ -80,19 +80,19 @@ body:not(:has(>.sidebar)) {
 body:has(>.sidebar) {
   grid-template-areas: "header header" "sidebar main" "footer main";
   grid-template-columns: 2fr 6fr;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr 30vh;
 }
 
 
 header, footer {
-    flex: 0 1 auto;
     flex-wrap: wrap;
 }
 
 footer {
     grid-area: footer;
-    height: 100%;
     width: 100%;
+    flex-wrap: wrap;
+    overflow-y: scroll;
 
     padding: 8px;
 }
@@ -117,14 +117,13 @@ main {
 
 .flex-horizontal {
     display: flex;
-    flex: 1 0 auto;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 2px;
 }
+
 .flex-horizontal-rev {
     display: flex;
-    flex: 1 0 auto;
     flex-direction: row-reverse;
     flex-wrap: wrap;
     gap: 2px;
@@ -231,7 +230,7 @@ td.pass {
 }
 
 td.fail {
-    background-color: var(--background-fail);
+    background-color: var(--background-danger);
 }
 
 code {
@@ -254,6 +253,7 @@ code {
 
 .sidebar {
     grid-area: sidebar;
+    z-index: 50;
     min-width: 100px;
     margin: 4px;
     border-radius: 8px;
@@ -328,6 +328,10 @@ code {
 
 .book p {
     overflow-wrap: break-word;
+}
+
+.book a:has(div) {
+    height: 100%;
 }
 
 .p-nopad p {
@@ -420,3 +424,40 @@ details[open] summary {
     border-bottom: 2px solid var(--background-secondary);
 }
 
+dialog {
+    border: 2px solid var(--background-secondary);
+
+    min-width: 40vw;
+    min-height: 40vh;
+    max-height: 80vh;
+}
+
+dialog::backdrop {
+    background-color: black;
+    opacity: 0.4;
+}
+
+hr {
+    width: 100%;
+    border-style: solid;
+    color: var(--background-tertiary);
+}
+
+.tag::before {
+    content: '#';
+}
+.tag {
+    padding: 8px;
+    border: 2px solid var(--background-secondary);
+    border-radius: 4px;
+}
+
+.danger {
+    background-color: var(--background-danger);
+    color: var(--foreground-danger);
+}
+button.danger:hover {
+    background-color: color-mix(in srgb, var(--background-danger), black 20%);
+    color: white;
+    box-shadow: var(--standard-shadow);
+}

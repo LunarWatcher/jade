@@ -42,6 +42,10 @@ void WebProvider::init(Server* server) {
         .CROW_MIDDLEWARES((server->app), NeedsAdmin)
         (JADE_CALLBACK_BINDING(getHealth));
 
+    CROW_ROUTE(server->app, "/help/search.html")
+        .methods(crow::HTTPMethod::GET)
+        (JADE_CALLBACK_BINDING(getSearchHelp));
+
     CROW_ROUTE(server->app, "/auth/login.html")
         .methods(crow::HTTPMethod::GET)
         (JADE_CALLBACK_BINDING(getLogin));
@@ -171,19 +175,13 @@ void WebProvider::getBooks(Server* server, crow::request& req, crow::response& r
         .includeSidebar = true,
     };
 
+    // Note: page IDs are assumed to be 0-indexed. The only place they should be 1-indexed is in the UI, and potentially
+    // briefly in a UI-backend translation layer
     auto pageIdStr = req.url_params.get("page");
     size_t pageId = 0;
 
     if (pageIdStr != nullptr) {
         pageId = std::stoull(pageIdStr);
-    }
-
-
-    if (!server->lib->isBookPageNumberValid(pageId, 50)) {
-        res.body = "Invalid page index";
-        res.code = 400;
-        res.end();
-        return;
     }
 
     auto page = ContextProvider::getBaseTemplate();
@@ -192,9 +190,24 @@ void WebProvider::getBooks(Server* server, crow::request& req, crow::response& r
         req, pageCtx, server
     );
 
+    auto results = server->lib->getBooks(pageId, 50);
+
+    if (pageId >= results.totalPages && pageId != 0) {
+        
+        res.body = "You provided an invalid page ID to your search. Did you incorrectly edit the parameter yourself?";
+        res.code = 400;
+        res.end();
+        return;
+    }
+
     ctx["Books"] = std::move(
-        Util::vec2json(server->lib->getBooks(pageId, 50))
+        Util::vec2json(results.res)
     );
+    ctx["Pages"] = {
+        {"TotalSingles", results.totalResults},
+        {"Count", results.totalPages},
+        {"CurrentPage", pageId}
+    };
 
     res = page.render(ctx);
     res.end();
@@ -269,9 +282,27 @@ void WebProvider::getBookReader(Server* server, crow::request& req, crow::respon
 
 void WebProvider::getLicenses(Server* server, crow::request& req, crow::response& res) {
     ContextProvider::PageContext pageCtx {
-        .pageTitle = "Open-source licenses | Jade Reader View",
+        .pageTitle = "Open-source licenses | Jade",
         .pageDescription = "Open-source licenses",
         .pageFile = "licenses.mustache",
+    };
+
+    auto page = ContextProvider::getBaseTemplate();
+    auto ctx = ContextProvider::buildBaseContext(
+        ContextProvider::USER, 
+        req, pageCtx, server
+    );
+
+    res = page.render(ctx);
+    res.end();
+}
+
+void WebProvider::getSearchHelp(Server* server, crow::request& req, crow::response& res) {
+
+    ContextProvider::PageContext pageCtx {
+        .pageTitle = "Search help | Jade",
+        .pageDescription = "Search help",
+        .pageFile = "help/search.mustache",
     };
 
     auto page = ContextProvider::getBaseTemplate();

@@ -26,12 +26,16 @@ main {
 
 #sidebar-header {
     padding: 8px;
+    flex-wrap: nowrap;
 }
 
 #sidebar-header > h1 {
     margin-left: 8px;
     margin: 0;
     align-self: center;
+    white-space: nowrap;
+    overflow-x: overlay;
+    height: 100%;
 }
 
 .popover {

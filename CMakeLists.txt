@@ -25,7 +25,7 @@ set(CROW_ENABLE_COMPRESSION ON CACHE STRING "" FORCE)
 
 FetchContent_Declare(pqxx
     GIT_REPOSITORY https://github.com/jtv/libpqxx
-    GIT_TAG 7.10.1
+    GIT_TAG 8d48b64b36158a50dc6ed33001c793652065b833
 )
 FetchContent_Declare(crowcpp
     GIT_REPOSITORY https://github.com/CrowCpp/Crow

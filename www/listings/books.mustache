@@ -6,4 +6,7 @@
     {{#Books}}
     {{>templates/book.mustache}}
     {{/Books}}
+    {{^Books}}
+    <p class="error-message">No books found :(</p>
+    {{/Books}}
 </div>

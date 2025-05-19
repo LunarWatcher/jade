@@ -1,4 +1,4 @@
-import { View } from './foliate-js/view.js'
+import { View, makeBook } from './foliate-js/view.js'
 import { createTOCView } from './foliate-js/ui/tree.js'
 import { Overlayer } from './foliate-js/overlayer.js'
 
@@ -43,13 +43,6 @@ const formatLanguageMap = x => {
     const keys = Object.keys(x)
     return x[keys[0]]
 }
-
-const formatOneContributor = contributor => typeof contributor === 'string'
-    ? contributor : formatLanguageMap(contributor?.name)
-
-const formatContributor = contributor => Array.isArray(contributor)
-    ? listFormat.format(contributor.map(formatOneContributor))
-    : formatOneContributor(contributor)
 
 class Reader {
     #tocView
@@ -159,7 +152,20 @@ class Reader {
 
     setupViewMode(/** @type {Boolean} */isFlexible) {
         this.rendererChangeListener(this.flowModeContainer, "flow");
-        this.rendererChangeListener(this.spreadModeContainer, "spread");
+        this.rendererChangeListener(this.spreadModeContainer, "spread", (val) => {
+            if (!this.view.isFixedLayout) {
+                if (val == "auto") {
+                    this.view.renderer.setAttribute("max-column-count", "2");
+                } else if (val == "both") {
+                    this.view.renderer.setAttribute("max-column-count", "2");
+                } else if (val == "portrait") {
+                    this.view.renderer.setAttribute("max-column-count", "1");
+                } else {
+                    throw Error("Wtf");
+                }
+            }
+            return val;
+        });
 
         if (!isFlexible) {
             for (let elem of document.getElementsByClassName("setting-needsflexible")) {
@@ -169,6 +175,7 @@ class Reader {
             for (let elem of document.getElementsByClassName("setting-needsnotflexible")) {
                 elem.disabled = true;
             }
+
         }
     }
 
@@ -181,7 +188,7 @@ class Reader {
         filter = null
     ) {
         const setAttr = () => {
-            this.view?.setAttribute(
+            this.view?.renderer.setAttribute(
                 property, 
                 (() => {
                     if (filter != null) {
@@ -194,7 +201,6 @@ class Reader {
         };
         elem.addEventListener("change", () => {
             setAttr()
-            this.refreshLayout();
         });
 
         // Invoked once during setup to force handling of weird caching of form options that differ from
@@ -208,7 +214,8 @@ class Reader {
         this.view = /** @type View */ (document.getElementsByTagName('foliate-view')[0]);
         this.view.focus();
 
-        await this.view.open(file)
+
+        await this.view.open(file);
         this.view.addEventListener('load', this.#onLoad.bind(this))
         this.view.addEventListener('relocate', this.#onRelocate.bind(this))
 
@@ -246,8 +253,6 @@ class Reader {
 
         document.addEventListener('keydown', this.#handleKeydown.bind(this))
 
-        const title = formatLanguageMap(book.metadata?.title) || 'Untitled Book'
-        document.title = title
         Promise.resolve(book.getCover?.())?.then(blob =>
             blob ? this.sidebarCover.src = URL.createObjectURL(blob) : null)
 

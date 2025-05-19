@@ -1,8 +1,14 @@
 #include "Book.hpp"
-#include <algorithm>
+#include "jade/util/Util.hpp"
 
 namespace jade {
 
+crow::json::wvalue Author::toJson() const {
+    return {
+        {"Name", name},
+        {"ID", id}
+    };
+}
 
 crow::json::wvalue Tag::toJson() const {
     return {
@@ -11,62 +17,49 @@ crow::json::wvalue Tag::toJson() const {
     };
 }
 
-crow::json::wvalue Series::toJson() const {
-    std::vector<crow::json::wvalue> bookData;
-    std::transform(
-       books.begin(), books.end(),
-       std::back_inserter(bookData),
-       [](auto& book) {
-           return book.toJson();
-       }
-    );
-
-    crow::json::wvalue ret = {
-        {"ID", id},
-        {"Name", seriesName},
-        {"Description", seriesDescription},
-        {"Books", bookData}
-    };
-
-
-    return ret;
-}
-
 crow::json::wvalue Book::toJson() const {
-    std::vector<crow::json::wvalue> tagData;
-    std::transform(
-       tags.begin(), tags.end(),
-       std::back_inserter(tagData),
-       [](auto& tag) {
-           return tag.toJson();
-       }
-    );
+    std::stringstream tagData, authorData;
+    for (auto& tag : tags) {
+        if (tagData.tellp() != 0) {
+            tagData << " ";
+        }
+        tagData << tag.name;
+    }
+    for (auto& author : authors) {
+        if (authorData.tellp() != 0) {
+            authorData << " & ";
+        }
+        authorData << author.name;
+    }
+
+
 
     crow::json::wvalue ret = {
         {"ID", id},
         {"Title", title},
         {"Description", description},
         {"ISBN", isbn},
-        {"Tags", tagData}
+        {"Tags", Util::vec2json<Tag>(tags)},
+        {"Authors", Util::vec2json<Author>(authors)},
+        {"STags", tagData.str()},
+        {"SAuthors", authorData.str()},
     };
+    if (tags.empty()) {
+        ret["STags"] = false;
+    }
+    if (authors.empty()) {
+        ret["SAuthors"] = false;
+    }
 
     // I really should look into inja
-    if (description == "") {
+    if (description.empty()) {
         ret["Description"] = false;
     }
-    if (isbn == "") {
+    if (isbn.empty()) {
         ret["ISBN"] = false;
     }
 
     return ret;
-}
-
-crow::json::wvalue Collection::toJson() const {
-    return {
-        {"ID", id},
-        {"Name", name},
-        {"Description", description}
-    };
 }
 
 }

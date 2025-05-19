@@ -65,6 +65,7 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
                 }
             };
             res.code = 401;
+            tx.abort();
             return;
         }
 
@@ -94,6 +95,7 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
         };
         userCtx.data->user = u;
 
+        tx.commit();
     });
 
     res.end();
@@ -135,6 +137,7 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
                 }
             };
             res.code = 400;
+            tx.abort();
             return;
         }
 

@@ -88,6 +88,7 @@ void Server::initEndpoints() {
 
 void Server::dbMigrations() {
     Migration m;
+    // TODO: Figure out how to disambiguate authors with the same name (additional author data?)
     m.pushVersion(R"(
     -- Object tables {{{
     CREATE TABLE Jade.Users (
@@ -105,23 +106,19 @@ void Server::dbMigrations() {
     );
     CREATE TABLE Jade.Tags (
         TagID       SERIAL          PRIMARY KEY,
-        TagName     TEXT            NOT NULL
+        TagName     TEXT            NOT NULL        UNIQUE,
+        TagType     INTEGER         NOT NULL        DEFAULT 0
     );
-    CREATE TABLE Jade.Collections (
-        CollectionID            SERIAL  PRIMARY KEY,
-        CollectionName          TEXT    NOT NULL,
-        CollectionDescription   TEXT
-    );
-    CREATE TABLE Jade.Series (
-        SeriesID            SERIAL  PRIMARY KEY,
-        SeriesName          TEXT    NOT NULL,
-        SeriesDescription   TEXT
+    CREATE TABLE Jade.Authors (
+        AuthorID SERIAL PRIMARY KEY,
+        AuthorName TEXT NOT NULL UNIQUE
     );
     CREATE TABLE Jade.Books (
         BookID      SERIAL          PRIMARY KEY,
         FileName    TEXT            NOT NULL,
-        LibraryID   INTEGER         REFERENCES Libraries(LibraryID) ON DELETE CASCADE,
-        SeriesID    INTEGER         REFERENCES Series(SeriesID) ON DELETE CASCADE,
+        LibraryID   INTEGER         REFERENCES Jade.Libraries(LibraryID) ON DELETE CASCADE,
+        Sequel      INTEGER         REFERENCES Jade.Books(BookID) ON DELETE SET NULL,
+        Prequel     INTEGER         REFERENCES Jade.Books(BookID) ON DELETE SET NULL,
         Title       TEXT            NOT NULL,
         ISBN        TEXT,
         Description TEXT,
@@ -134,11 +131,10 @@ void Server::dbMigrations() {
         TagID  INTEGER NOT NULL REFERENCES Jade.Tags(TagID) ON DELETE CASCADE,
         PRIMARY KEY (BookID, TagID)
     );
-    CREATE TABLE Jade.BookSeries (
+    CREATE TABLE Jade.BookAuthors (
         BookID INTEGER NOT NULL REFERENCES Jade.Books(BookID) ON DELETE CASCADE,
-        SeriesID  INTEGER NOT NULL REFERENCES Jade.Series(SeriesID) ON DELETE CASCADE,
-        BookIndex       INTEGER NOT NULL,
-        PRIMARY KEY (BookID, SeriesID)
+        AuthorID  INTEGER NOT NULL REFERENCES Jade.Authors(AuthorID) ON DELETE CASCADE,
+        PRIMARY KEY (BookID, AuthorID)
     );
     -- }}}
     )");

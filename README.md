@@ -1,5 +1,9 @@
 # jade - an ebook reader
 
+> [!WARNING]
+>
+> Jade is currently in development, and in so early development that the database will break regularly. If you plan to use it before it's stable-ish, note that you will have to purge the database or manually work it into a current state
+
 ## Why?
 
 I need two things from an ebook reader:
@@ -32,6 +36,27 @@ Additionally, this is primarily intended as an extended and user-syncable.
 * calibre[^1], installed via your system package manager (See: https://github.com/kovidgoyal/calibre?tab=readme-ov-file#calibre-package-versions-in-various-repositories)
 * PostgreSQL (not necessarily on the same server)
 
+
+## Planned  features
+
+### Reader
+
+| Done | Description | Blocked? |
+| ---- | ----------- | -------- |
+| - [ ] | Configurable FixedLayout columns | [Yes](https://github.com/johnfactotum/foliate-js/issues/66) |
+| - [ ] | Fully scrollable files | [Yes](https://github.com/johnfactotum/foliate-js/issues/66) |
+| - [ ] | Inline zoom | |
+| - [ ] | Search | | 
+
+
+### Everything else
+
+| Done | Description | Blocked? |
+| --- | --- | --- |
+| - [ ] | Text search | |
+| - [ ] | Tag search | |
+| - [ ] | Author search | |
+| - [ ] | Sequels and prequels | |
 
 [^1]: Calibre is used to deal with cover image generation due to its wide format support. The only other viable alternatives is to write it from scratch, or use a headless browser with the same renderer used for the website, to render it to png, which has 500M-1G worth of overhead. Optimally, writing it from scratch in a separate non-browser library would be beneficial (and reusable elsewhere while potentially being more performant), but this would be a massive undertaking that I do not feel like getting into unless there's other people who can provide additional resources with writing it. Until this exceedingly unlikely event happens, calibre is used to simplify the process.
 [^2]: In C++ in particular, it seems to be easier to find parsers than it is to find writers. Avoiding writes means significantly less implementation complexity.

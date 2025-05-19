@@ -11,6 +11,7 @@ add_library(jadesrc STATIC
 
     
     jade/data/AuthRequest.cpp
+    jade/data/BookRequests.cpp
     jade/data/SettingsRequests.cpp
     jade/data/User.cpp
     jade/data/db/Book.cpp

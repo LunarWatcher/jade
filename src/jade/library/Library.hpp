@@ -9,6 +9,7 @@
 #include <shared_mutex>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 
 namespace jade {
 
@@ -38,6 +39,14 @@ enum class BookType {
     CB_RAR,
     CB_GENERIC,
 };
+
+template <typename Result>
+struct SearchResult {
+    int64_t totalResults;
+    int64_t totalPages;
+    Result res;
+};
+using BookListResult = SearchResult<std::vector<Book>>;
 
 class Server;
 class Library : public health::HealthCheckable {
@@ -118,30 +127,7 @@ public:
      * No sorting or filtering is currently supported. The default sort is descending by BookID, meaning (theoretically)
      * the most recently uploaded books are first.
      */
-    std::vector<Book> getBooks(size_t page, size_t pagesize = 50);
-
-    /**
-     * Returns a vector of Collections.
-     *
-     * Like getBooks, no sorting or filtering is currently supported. The default sort is descending by CollectionID,
-     * meaning the most recently created collections are first
-     */
-    std::vector<Collection> getCollections(size_t page, size_t pagesize = 50);
-
-    /**
-     * Returns a vector of books in a given collection.
-     */
-    std::vector<Book> getCollection(int64_t collectionId, size_t page, size_t pagesize = 50);
-
-    /**
-     * Returns a vector of series without the books in them. Useful for listing series
-     */
-    std::vector<Series> getAllSeries(size_t page, size_t pagesize = 50);
-
-    /**
-     * Returns a single Series with its Books populated.
-     */
-    Series getSeries(int64_t seriesId, size_t page, size_t pagesize = 50);
+    BookListResult getBooks(size_t page, size_t pagesize = 50);
 
     std::optional<Book> getBook(int64_t bookID);
 

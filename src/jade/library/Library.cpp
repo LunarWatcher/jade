@@ -34,6 +34,7 @@ Library::Library(Server* s, pqxx::connection& conn) : serv(s) {
         spdlog::warn("No active libraries");
     }
 
+    w.abort();
 }
 
 void Library::scan() {
@@ -72,6 +73,7 @@ void Library::scan() {
                 source.bookCount = std::get<0>(res);
                 bookCount += source.bookCount;
             }
+            w.abort();
         });
 
         if (sources.size() == 0) {
@@ -99,6 +101,7 @@ bool Library::createLibrary(Server* serv, const std::string& location) {
         );
 
         if (std::get<0>(exists)) {
+            w.abort();
             return false;
         }
 
@@ -185,7 +188,7 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
                 );
 
                 std::string title;
-                if (code != 0) {
+                if (code == 0) {
                     auto lines = stc::string::split(output, '\n');
 
                     for (auto& line : lines) {
@@ -195,6 +198,8 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
                             break;
                         }
                     }
+                } else {
+                    spdlog::error("ebook-meta failed: {}", output);
                 }
 
                 auto res = w.exec(
@@ -257,16 +262,17 @@ void Library::generateThumbnail(int64_t id, const std::filesystem::path& file) {
 
 }
 
-std::vector<Book> Library::getBooks(size_t page, size_t pagesize) {
-    return serv->pool->acquire<std::vector<Book>>([&](auto& conn) -> std::vector<Book> {
+BookListResult Library::getBooks(size_t page, size_t pagesize) {
+    return serv->pool->acquire<BookListResult>([&](auto& conn) -> BookListResult {
         pqxx::work w(conn);
         std::vector<Book> out;
 
         // TODO: include tags (do I need a second query, or can I inline?)
         auto rows = w.query<
-            int64_t, std::string_view, std::string_view, std::string_view
+            int64_t, int64_t, std::string_view, std::string_view, std::string_view
         >(R"(
             SELECT 
+                COUNT(*) OVER(),
                 BookID,
                 Title,
                 COALESCE(Description, ''), 
@@ -280,36 +286,62 @@ std::vector<Book> Library::getBooks(size_t page, size_t pagesize) {
             page * pagesize
         });
 
-        for (auto& [id, title, description, isbn] : rows) {
-            out.push_back(Book {
-                .id = id,
-                .title = std::string{ title },
-                .description = std::string{ description },
-                .isbn = std::string{ isbn },
-            });
-        }
+        int64_t totalResults = 0;
+        if (rows.begin() != rows.end()) {
+            totalResults = std::get<0>(*rows.begin());
+            for (auto& [_, id, title, description, isbn] : rows) {
+                
+                Book b {
+                    .id = id,
+                    .title = std::string{ title },
+                    .description = std::string{ description },
+                    .isbn = std::string{ isbn },
+                };
 
-        return out;
+                // TODO: This feels extremely inefficient
+                auto tags = w.query<int64_t, std::string_view>(R"(
+                Select Jade.BookTags.TagID, Jade.Tags.TagName
+                FROM Jade.BookTags
+                INNER JOIN Jade.Tags ON Jade.Tags.TagID = Jade.BookTags.TagID
+                WHERE Jade.BookTags.BookID = $1;
+                )", pqxx::params {
+                    id
+                });
+                auto authors = w.query<int64_t, std::string_view>(R"(
+                Select Jade.BookAuthors.AuthorID, Jade.Authors.AuthorName
+                FROM Jade.BookAuthors
+                INNER JOIN Jade.Authors ON Jade.Authors.AuthorID = Jade.BookAuthors.AuthorID
+                WHERE Jade.BookAuthors.BookID = $1;
+                )", pqxx::params {
+                    id
+                });
+
+                for (auto& [id, name] : tags) {
+                    b.tags.push_back(Tag { id, std::string(name) });
+                }
+                for (auto& [id, name] : authors) {
+                    b.authors.push_back(Author { id, std::string(name) });
+                }
+
+                out.push_back(b);
+            }
+        }
+        w.abort();
+        return {
+            .totalResults = totalResults,
+            .totalPages = (int64_t) std::ceil((double) totalResults / (double) pagesize),
+            .res = out
+        };
     });
-}
-std::vector<Collection> Library::getCollections(size_t page, size_t pagesize) {
-    return {};
-}
-std::vector<Book> Library::getCollection(int64_t collectionId, size_t page, size_t pagesize) {
-    return {};
-}
-std::vector<Series> Library::getAllSeries(size_t page, size_t pagesize) {
-    return {};
-}
-Series Library::getSeries(int64_t seriesId, size_t page, size_t pagesize) {
-    return {};
 }
 
 std::optional<Book> Library::getBook(int64_t bookID) {
     return serv->pool->acquire<std::optional<Book>>([&](auto& conn) -> std::optional<Book> {
         pqxx::work w(conn);
 
-        auto row = w.query01<std::string_view, std::string_view, std::string_view, std::string_view, int64_t>(
+        auto row = w.query01<
+            std::string_view, std::string_view, std::string_view, std::string_view, int64_t
+        >(
             R"(
             SELECT 
                 Title,
@@ -317,24 +349,52 @@ std::optional<Book> Library::getBook(int64_t bookID) {
                 COALESCE(ISBN, ''),
                 FileName,
                 LibraryID
-            FROM Jade.Books WHERE BookID = $1
+            FROM Jade.Books
+            WHERE BookID = $1
             )",
             pqxx::params {
                 bookID
             }
         );
 
-        if (!row) {
+        if (!row.has_value()) {
             return std::nullopt;
         }
 
-        return Book {
+        Book b {
             bookID,
             std::string { std::get<0>(*row) },
             std::string { std::get<1>(*row) },
             std::string { std::get<2>(*row) },
             std::string { sources.at(std::get<4>(*row)).dir / std::get<3>(*row) },
         };
+
+        // TODO: This feels extremely inefficient
+        auto tags = w.query<int64_t, std::string_view>(R"(
+        Select Jade.BookTags.TagID, Jade.Tags.TagName
+        FROM Jade.BookTags
+        INNER JOIN Jade.Tags ON Jade.Tags.TagID = Jade.BookTags.TagID
+        WHERE Jade.BookTags.BookID = $1
+        )", pqxx::params {
+            bookID
+        });
+        auto authors = w.query<int64_t, std::string_view>(R"(
+        Select Jade.BookAuthors.AuthorID, Jade.Authors.AuthorName
+        FROM Jade.BookAuthors
+        INNER JOIN Jade.Authors ON Jade.Authors.AuthorID = Jade.BookAuthors.AuthorID
+        WHERE Jade.BookAuthors.BookID = $1
+        )", pqxx::params {
+            bookID
+        });
+
+        for (auto& [id, name] : tags) {
+            b.tags.push_back(Tag { id, std::string(name) });
+        }
+        for (auto& [id, name] : authors) {
+            b.authors.push_back(Author { id, std::string(name) });
+        }
+
+        return b;
     });
 }
 

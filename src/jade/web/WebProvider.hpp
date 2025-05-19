@@ -19,6 +19,8 @@ extern void getBooks(Server* server, crow::request& req, crow::response& res);
 extern void getBookDetails(Server* server, crow::request& req, crow::response& res, int bookID);
 extern void getBookReader(Server* server, crow::request& req, crow::response& res, int bookID);
 
+extern void getSearchHelp(Server* server, crow::request& req, crow::response& res);
+
 extern void getAdminSettings(Server* server, crow::request& req, crow::response& res);
 extern void getHealth(Server* server, crow::request& req, crow::response& res);
 
