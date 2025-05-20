@@ -2,6 +2,7 @@
 #include "crow/common.h"
 #include "jade/core/ContextProvider.hpp"
 #include "jade/core/Typedefs.hpp"
+#include "jade/data/BookRequests.hpp"
 #include "jade/server/AuthWall.hpp"
 #include "jade/server/SessionMiddleware.hpp"
 #include "jade/util/Util.hpp"
@@ -184,13 +185,29 @@ void WebProvider::getBooks(Server* server, crow::request& req, crow::response& r
         pageId = std::stoull(pageIdStr);
     }
 
+    auto searchStr = req.url_params.get("search");
+    SearchRequest searchQuery;
+    if (searchStr != 0) {
+        try {
+            searchQuery = SearchRequest::parse(searchStr);
+        } catch (const std::exception& e) {
+            spdlog::error("{}", e.what());
+
+            // TODO: prevent invalid searches from hiding the searchbar and shit
+            res.body = "Invalid search query";
+            res.code = 400;
+            res.end();
+            return;
+        }
+    }
+
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
         ContextProvider::USER, 
         req, pageCtx, server
     );
 
-    auto results = server->lib->getBooks(pageId, 50);
+    auto results = server->lib->getBooks(pageId, 50, searchQuery);
 
     if (pageId >= results.totalPages && pageId != 0) {
         

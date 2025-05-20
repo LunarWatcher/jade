@@ -1,5 +1,6 @@
 #pragma once
 
+#include "jade/data/BookRequests.hpp"
 #include "jade/data/db/Book.hpp"
 #include "jade/health/HealthCheck.hpp"
 #include <map>
@@ -126,8 +127,17 @@ public:
      *
      * No sorting or filtering is currently supported. The default sort is descending by BookID, meaning (theoretically)
      * the most recently uploaded books are first.
+     *
+     * \param page          The page to request
+     * \param pagesize      How many results per page
+     * \param searchData    Optional struct with search parameters. Does nothing if the search parameter data objects
+     *                      std::nullopt or empty vectors.
      */
-    BookListResult getBooks(size_t page, size_t pagesize = 50);
+    BookListResult getBooks(
+        size_t page,
+        size_t pagesize = 50,
+        std::optional<SearchRequest> searchData = std::nullopt
+    );
 
     std::optional<Book> getBook(int64_t bookID);
 

@@ -89,14 +89,14 @@ add_definitions(-DJADE_VERSION="${JADE_VERSION}")
 # }}}
 
 add_subdirectory(src)
-#add_subdirectory(tests EXCLUDE_FROM_ALL)
+add_subdirectory(tests EXCLUDE_FROM_ALL)
 
 add_custom_target(run
     COMMAND jade
     DEPENDS jade
     COMMENT "Run jade")
-#add_custom_target(test
-    #COMMAND tests
-    #DEPENDS tests
-    #COMMENT "Test jade")
+add_custom_target(test
+    COMMAND tests
+    DEPENDS tests
+    COMMENT "Test jade")
 # vim:ft=cmake

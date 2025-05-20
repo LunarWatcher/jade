@@ -53,9 +53,9 @@ Additionally, this is primarily intended as an extended and user-syncable.
 
 | Done | Description | Blocked? |
 | --- | --- | --- |
-| [ ] | Text search | |
-| [ ] | Tag search | |
-| [ ] | Author search | |
+| [x] | Text search | |
+| [x] | Tag search | |
+| [x] | Author search | |
 | [ ] | Sequels and prequels | |
 
 [^1]: Calibre is used to deal with cover image generation due to its wide format support. The only other viable alternatives is to write it from scratch, or use a headless browser with the same renderer used for the website, to render it to png, which has 500M-1G worth of overhead. Optimally, writing it from scratch in a separate non-browser library would be beneficial (and reusable elsewhere while potentially being more performant), but this would be a massive undertaking that I do not feel like getting into unless there's other people who can provide additional resources with writing it. Until this exceedingly unlikely event happens, calibre is used to simplify the process.

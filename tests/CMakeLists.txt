@@ -1,5 +1,5 @@
 add_executable(tests 
-    src/ABCDTests.cpp
+    src/unit/SearchParsing.cpp
 )
 
 Include(FetchContent)

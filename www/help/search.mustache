@@ -12,7 +12,22 @@
     </thead>
     <tbody>
         <tr>
+            <td>Text search (title + description)</td>
+            <td>Literal search string, no special syntax</td>
+            <td><code>The Expanse</code></td>
+        </tr>
+        <tr>
+            <td>Title search</td>
+            <td><code>title:"some title"</code></td>
+            <td><code>title:"The Expanse"</code></td>
+        </tr>
+        <tr>
             <td>Tag search</td>
+            <td><code>#tag_name</code></td>
+            <td><code>#Genres/Sci-fi</code></td>
+        </tr>
+        <tr>
+            <td>Tag search (alternate form)</td>
             <td><code>tag:tag_name</code></td>
             <td><code>tag:Genres/Sci-fi</code></td>
         </tr>
@@ -23,3 +38,37 @@
         </tr>
     </tbody>
 </table>
+
+
+<h2>Text search</h2>
+
+<p>Text search is the default form of search, which is used when no operators are specified. For now, text search is very limited, as the text search uses literal operators, which means no fuzzy search. All forms of search are case-insensitive.</p>
+
+<details>
+    <summary>
+        Technical details
+    </summary>
+    <div>
+        <p>The search system is based around raw SQL queries rather than a proper search index system, and is extremely minimal as a result. More advanced indexing, unless a complex system is written from scratch, requires external, non-embeddable, commonly Java-based services (like OpenSearch). Jade already has a single external dependency (Postgres), and adding a second one that doesn't even have a C++ client is not an option that's compatible with Jade's software design philosophy.</p>
+        <p>Until an alternative system can be found, preferably one that can be embedded, extremely basic systems will be used to provide a good chunk of the required functionality, even if it isn't really good enough for highly flexible use.</p>
+    </div>
+</details>
+
+<h2>Title search</h2>
+
+<p>Title search is done using the <code>title:</code> prefix. Title search, like text search, is case-insensitive. Some usage examples:</p>
+
+<ul>
+    <li><code>title:Incorrect use of multiple words</code>: actually searches for "use of multiple words" in title and description, and "Incorrect" in title only</li>
+    <li><code>title:"Correct use of multiple words"</code>: Searches all books for a title containing "Correct use of multiple words"</li>
+    <li><code>title:Single-word</code>: Searches all books for a title containing "single-word"</li>
+</ul>
+
+<h2>Tag search</h2>
+
+<p>Tag search is done with the <code>tag:</code> prefix, or the <code>#</code> prefix. Either of the two are accepted, and can be used interchangeably. The use of <code>#</code> may be ambiguous in certain conditions, and is currently always assumed to be a tag. A way to search for the literal <code>#</code> will be provided in the future.</p>
+<p>Quotes should not be used with the tag search, as tags are not allowed to have spaces, and will be interpreted literally as being part of the name.</p>
+
+<h2>Author search</h2>
+<p>Author search is done with the <code>author:</code> prefix. Like title search, quotes can be used to include arguments with spaces.</p>
+

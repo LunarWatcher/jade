@@ -1,6 +1,7 @@
 <div class="search-wrapper flex-vertical">
-    <form class="flex-horizontal search" id="book-filter">
+    <form class="flex-horizontal search" id="book-filter" method="get">
         <input type="text" name="search" placeholder="..." class="flex-grow" />
+        <input type="hidden" name="page" value="0" />
         <input type="submit" value="Search" />
     </form>
 

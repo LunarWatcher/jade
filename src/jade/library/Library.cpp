@@ -1,4 +1,5 @@
 #include "Library.hpp"
+#include "jade/data/BookRequests.hpp"
 #include "jade/health/HealthCheck.hpp"
 #include "spdlog/spdlog.h"
 #include <cctype>
@@ -262,29 +263,104 @@ void Library::generateThumbnail(int64_t id, const std::filesystem::path& file) {
 
 }
 
-BookListResult Library::getBooks(size_t page, size_t pagesize) {
+BookListResult Library::getBooks(size_t page, size_t pagesize, std::optional<SearchRequest> searchData) {
     return serv->pool->acquire<BookListResult>([&](auto& conn) -> BookListResult {
         pqxx::work w(conn);
         std::vector<Book> out;
 
-        // TODO: include tags (do I need a second query, or can I inline?)
-        auto rows = w.query<
-            int64_t, int64_t, std::string_view, std::string_view, std::string_view
-        >(R"(
-            SELECT 
+        pqxx::params p {
+            pagesize,
+            page * pagesize
+        };
+        std::stringstream query;
+        query << R"(SELECT 
                 COUNT(*) OVER(),
                 BookID,
                 Title,
                 COALESCE(Description, ''), 
                 COALESCE(ISBN, '')
             FROM Jade.Books
+        )";
+
+        // TODO: This is cursed, probably inefficient as fuck, and I fucking hate it, but this is as good as it's going
+        // to get for now. This needs to be replaced by a proper search index rather than these absolutely jank SQL
+        // queries
+        //
+        // (That said, holy fuck, I cannot believe it fucking works!)
+        if (
+            searchData.has_value()
+            && (
+                searchData->literal.has_value()
+                || searchData->title.has_value()
+                || !searchData->tags.empty()
+                || !searchData->authors.empty()
+            )
+        ) {
+            query << "WHERE\n";
+
+            bool hasField = false;
+            size_t runningIdx = 2;
+            if (searchData->literal.has_value()) {
+                hasField = true;
+                ++runningIdx;
+                query
+                    << "(Title ILIKE '%' || $" << runningIdx << " || '%'"
+                    << "OR Description ILIKE '%' || $" << runningIdx << " || '%')\n";
+                p.append(searchData->literal.value());
+            }
+
+            if (searchData->title.has_value()) {
+                if (hasField) {
+                    query << " AND ";
+                }
+                hasField = true;
+                query << "Title ILIKE '%' || $" << ++runningIdx << " || '%'\n";
+                p.append(*searchData->title);
+            }
+            if (!searchData->tags.empty()) {
+                if (hasField) {
+                    query << " AND ";
+                }
+                hasField = true;
+                query << std::format(R"(
+                Jade.Books.BookID IN (
+                    SELECT r.BookID
+                    FROM Jade.BookTags r
+                    JOIN Jade.Tags t on r.TagID = t.TagID
+                    WHERE t.TagName = ANY(${0}) AND Jade.Books.BookID = r.BookID
+                    GROUP BY r.BookID
+                    HAVING COUNT(DISTINCT t.TagName) = CARDINALITY(${0})
+                )
+                )", ++runningIdx);
+                p.append(searchData->tags);
+            }
+            if (!searchData->authors.empty()) {
+                if (hasField) {
+                    query << " AND ";
+                }
+                hasField = true;
+                query << std::format(R"(
+                Jade.Books.BookID IN (
+                    SELECT r.BookID
+                    FROM Jade.BookAuthors r
+                    JOIN Jade.Authors t on r.AuthorID = t.AuthorID
+                    WHERE t.AuthorName ILIKE ANY(${0}) AND Jade.Books.BookID = r.BookID
+                    GROUP BY r.BookID
+                    HAVING COUNT(DISTINCT t.AuthorName) = CARDINALITY(${0})
+                )
+                )", ++runningIdx);
+                p.append(searchData->authors);
+            }
+        }
+
+        query << R"(
             ORDER BY BookID DESC
             LIMIT $1
-            OFFSET $2
-        )", pqxx::params {
-            pagesize,
-            page * pagesize
-        });
+            OFFSET $2)";
+        spdlog::debug("Running {}", query.str());
+        auto rows = w.query<
+            int64_t, int64_t, std::string_view, std::string_view, std::string_view
+        >(query.str(), p);
 
         int64_t totalResults = 0;
         if (rows.begin() != rows.end()) {
