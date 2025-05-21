@@ -49,8 +49,9 @@ sudo -u $JADE_USER make install
 if [[ "$PSQL_PASSWORD" == "" ]];
 then
     set +x
-    read -s -p "Postgres password for [postgres] user jade: " PSQL_PASSWORD
-    if [[ $? != 0 ]]; then
+    echo "Postgres password for [postgres] user jade: "
+    read -s PSQL_PASSWORD
+    if [[ $? != 0 ]] || [[ "$PSQL_PASSWORD" == "" ]]; then
         echo "Panic: failed to read password"
         exit -2
     fi
