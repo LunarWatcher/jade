@@ -63,7 +63,9 @@ fi
 # These can error out; error means stuff already exists, and is probably a consequence of the installer being re-run
 set +e
 # TODO: This has escaping issues, but ${PSQL_PASSWORD@Q} will likely break the password because erroneous \" 
+set +x
 sudo -u postgres psql -c "CREATE USER jade WITH ENCRYPTED PASSWORD '$PSQL_PASSWORD';"
+set -x
 sudo -u postgres psql -c "CREATE DATABASE jade;"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE jade TO jade;"
 set -e
