@@ -39,8 +39,14 @@ Additionally, this is primarily intended as an extended and user-syncable.
 
 ## Installation 
 ```
-bash <(curl -L https://codeberg.org/LunarWatcher/jade/raw/branch/master/scripts/install.sh)
+JADE_DOMAIN=example.com JADE_CERT=/path/to/cert JADE_CERT_KEY=/path/to_key bash <(curl -L https://codeberg.org/LunarWatcher/jade/raw/branch/master/scripts/install.sh)
 ```
+
+Supported variables:
+* `JADE_DOMAIN`: Required, sets `server_name` in nginx to `ebooks.${JADE_DOMAIN}`[^3]
+* `JADE_CERT`/`JADE_CERT_KEY`: Sets nginx's `ssl_certificate` and `ssl_certificate_key` respectively[^3].
+* `PSQL_PASSWORD`: Optional, used to set the password in postgres. If not provided, you'll be prompted for a password
+* `JADE_USER`: Optional, defaults to `jade`
 
 
 ## Planned  features
@@ -66,3 +72,4 @@ bash <(curl -L https://codeberg.org/LunarWatcher/jade/raw/branch/master/scripts/
 
 [^1]: Calibre is used to deal with cover image generation due to its wide format support. The only other viable alternatives is to write it from scratch, or use a headless browser with the same renderer used for the website, to render it to png, which has 500M-1G worth of overhead. Optimally, writing it from scratch in a separate non-browser library would be beneficial (and reusable elsewhere while potentially being more performant), but this would be a massive undertaking that I do not feel like getting into unless there's other people who can provide additional resources with writing it. Until this exceedingly unlikely event happens, calibre is used to simplify the process.
 [^2]: In C++ in particular, it seems to be easier to find parsers than it is to find writers. Avoiding writes means significantly less implementation complexity.
+[^3]: If you don't want SSL, this must be removed from `/etc/nginx/conf.d/jade.conf` after the fact. Other changes to nginx must be made manually in this file as well, for example if you don't want `ebooks.your-domain`

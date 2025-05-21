@@ -26,6 +26,7 @@ void BookAPI::init(Server *server) {
 
 void BookAPI::getImage(Server* server, crow::request&, crow::response& res, int bookID) {
     auto theoreticalImgPath = server->getConfig().thumbnailCacheDir / (std::to_string(bookID) + ".jpg");
+    spdlog::debug("Looking for cover for {} in {}", bookID, theoreticalImgPath.string());
     if (!std::filesystem::exists(theoreticalImgPath)) {
         res.code = 404;
         res.end();

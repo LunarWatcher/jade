@@ -66,6 +66,7 @@ set +e
 set +x
 sudo -u postgres psql -c "CREATE USER jade WITH ENCRYPTED PASSWORD '$PSQL_PASSWORD';"
 set -x
+sudo -u postgres psql -c "ALTER DATABASE template1 REFRESH COLLATION VERSION"
 sudo -u postgres psql -c "CREATE DATABASE jade;"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE jade TO jade;"
 set -e
