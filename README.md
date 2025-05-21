@@ -32,9 +32,15 @@ Additionally, this is primarily intended as an extended and user-syncable.
 * C++20 compiler
 * Linux
 * OpenSSL
-* libpq (Debian: `libpq-dev`) and postgresql
-* calibre[^1], installed via your system package manager (See: https://github.com/kovidgoyal/calibre?tab=readme-ov-file#calibre-package-versions-in-various-repositories)
+* libpq (Debian: `libpq-dev`)
 * PostgreSQL (not necessarily on the same server)
+* CMake 3.10 or newer
+* calibre[^1], installed via your system package manager (See: https://github.com/kovidgoyal/calibre?tab=readme-ov-file#calibre-package-versions-in-various-repositories)
+
+## Installation 
+```
+curl -L https://codeberg.org/LunarWatcher/jade/raw/branch/master/scripts/install.sh | bash
+```
 
 
 ## Planned  features
