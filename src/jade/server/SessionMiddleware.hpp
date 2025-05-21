@@ -99,10 +99,10 @@ public:
     SessionMiddleware(T s) : store(s) {}
 
     template <typename AllContext>
-    void before_handle(crow::request& req, crow::response&, context& ctx, AllContext& globalCtx) {
+    void before_handle(crow::request&, crow::response&, context& ctx, AllContext& globalCtx) {
         crow::CookieParser::context& cookies = globalCtx.template get<crow::CookieParser>();
         auto sessionId = cookies.get_cookie("session");
-        if (sessionId == "") {
+        if (sessionId.empty()) {
             return;
         }
 
@@ -115,20 +115,20 @@ public:
     }
 
     template <typename AllContext>
-    void after_handle(crow::request& req, crow::response& res, context& ctx, AllContext& globalCtx) {
+    void after_handle(crow::request&, crow::response&, context& ctx, AllContext& globalCtx) {
         crow::CookieParser::context& cookies = globalCtx.template get<crow::CookieParser>();
         auto currSessToken = cookies.get_cookie("session");
 
         if (ctx.wantsNewSession) {
             auto newSession = createSession(ctx.data);
-            if (currSessToken != "") {
+            if (!currSessToken.empty()) {
                 store.destroy(currSessToken);
             }
 
             cookies.set_cookie(newSession);
         } else if (ctx.killSession
             // Dead session, session expired, server restarted, failed token fixation attack, etc.
-            || (currSessToken != "" && !store.getSessionData(currSessToken))
+            || (!currSessToken.empty() && !store.getSessionData(currSessToken))
         ) {
             // Cookie invalid or session requested killed; destroy cookie, and kill the session if it exists
             store.destroy(currSessToken);

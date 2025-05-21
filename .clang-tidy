@@ -1,0 +1,27 @@
+# Notes:
+# - clang-analyzer-optin.core.EnumCastOutOfRange: Useful, complains about std::filesystem::file_size for no fucking reason
+# - clang-analyzer-cplusplus.NewDeleteLeaks: borked (https://github.com/llvm/llvm-project/issues/55219)
+# - bugprone-unchecked-optional-access: borked (especially with nested optionals, even if the if statement checks all access)
+Checks: >
+  -*,
+  bugprone-*,
+  clang-*,
+  misc-*,
+  performance-*,
+  portability-*,
+  modernize-deprecated-headers,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-exception-escape,
+  -bugprone-unchecked-optional-access,
+  -clang-analyzer-optin.core.EnumCastOutOfRange,
+  -clang-diagnostic-unused-parameter,
+  -misc-non-private-*,
+  -misc-const-correctness,
+  -misc-include-cleaner,
+  -performance-avoid-endl,
+  -performance-enum-size,
+  -readability-*,
+  -clang-analyzer-cplusplus.NewDeleteLeaks
+
+# Windows does not like to cooperate with the correct type of path slashes
+HeaderFilterRegex: ".*\\/src\\/jade\\/.*"

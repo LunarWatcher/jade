@@ -107,7 +107,6 @@ extern void buildUserContext(
 
 extern void buildLibraryContext(
     crow::mustache::context& ctx,
-    crow::request& req,
     Server* serv
 );
 

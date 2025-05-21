@@ -48,9 +48,9 @@ std::string _detail::pbkdf2_sha512(const std::string &pass, const std::string &s
     unsigned char digest[SHA512_DIGEST_LENGTH];
     PKCS5_PBKDF2_HMAC(
         pass.c_str(),
-        pass.size(),
+        (int) pass.size(),
         reinterpret_cast<const unsigned char*>(salt.c_str()),
-        salt.size(),
+        (int) salt.size(),
         iterations,
         EVP_sha512(),
         SHA512_DIGEST_LENGTH,

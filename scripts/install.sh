@@ -10,8 +10,6 @@ if [ -d /opt/jade ]; then
     return -69
 fi
 
-sudo mkdir jade
-sudo chown olivia jade
 
 echo "Using username ${JADE_USER:=jade}"
 # This command failure is checked; re-allow bash to continue even on error
@@ -33,6 +31,19 @@ else
     sleep 10
 fi
 
+sudo mkdir jade
+sudo chown -R $JADE_USER /opt/jade
+sudo -u $JADE_USER git clone https://codeberg.org/LunarWatcher/jade
+cd /opt/jade
+
+# TODO: I think this might count as insecure. Keeping /opt/jade and /opt/jade/dist/bin owned by $USER or root (root probably just for the bin folder), and
+# making the data dir itself owned by $JADE_USER might be safer?
+sudo -u $JADE_USER mkdir build
+cd build
+sudo -u $JADE_USER cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/jade/dist/ 
+sudo -u $JADE_USER make -j $(nproc)
+sudo -u $JADE_USER make install
+
 # Database init {{{
 # For non-interactive use, check for the PSQL_PASSWORD env variable before prompting
 if [[ "$PSQL_PASSWORD" == "" ]];
@@ -50,3 +61,35 @@ sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE jade TO jade;"
 set -e
 # }}}
 
+cat <<EOF | sudo tee /etc/nginx/conf.d/jade.conf
+server {
+    listen 443 ssl http2;
+    server_name ebooks.${JADE_DOMAIN:-FIXME};
+    ssl_certificate         ${JADE_CERT:-FIXME};
+    ssl_certificate_key     ${JADE_CERT_KEY:-FIXME};
+
+    location / {
+        proxy_set_header   X-Real-IP \$remote_addr;
+        proxy_set_header   X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header   Host \$host;
+        proxy_pass         http://localhost:6969/;
+        # Required to prevent downgrades during redirects
+        # This is caused by an oddity in how Crow handles redirects. See
+        #     https://github.com/CrowCpp/Crow/blob/ad337a8a868d1d6bc61e9803fc82f36c61f706de/include/crow/http_connection.h#L257
+        # for the code in question
+        proxy_redirect     http://$host/ https://$host/;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade \$http_upgrade;
+        proxy_set_header   Connection "upgrade";
+
+        # Required for HTTP basic auth services
+        proxy_set_header   Authorization \$http_authorization;
+        proxy_pass_header  Authorization;
+    }
+}
+EOF
+
+cd /opt/jade
+sudo cp etc/systemd/system/jade.service /etc/systemd/system/jade.service
+sudo mkdir -p /etc/jade
+sudo cp etc/jade/jade.example.json /etc/jade/jade.example.json

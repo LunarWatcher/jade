@@ -1,0 +1,15 @@
+[Unit]
+Description=Ebook server
+Wants=network-online.target
+After=network.target
+
+[Service]
+Restart=on-failure
+RestartSec=60s
+Type=idle
+WorkingDirectory=/opt/jade/dist
+ExecStart=/opt/jade/dist/bin/jade run
+User=jade
+
+[Install]
+WantedBy=multi-user.target

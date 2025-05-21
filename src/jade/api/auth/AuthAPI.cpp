@@ -115,7 +115,7 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
 
     SignupRequest data = nlohmann::json::parse(req.body);
 
-    if (data.username == "" || data.password == "") {
+    if (data.username.empty() || data.password.empty()) {
         res = JSONMessageResponse("Username or password missing");
         res.code = crow::BAD_REQUEST;
         res.end();

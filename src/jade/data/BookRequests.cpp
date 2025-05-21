@@ -5,25 +5,25 @@
 void jade::from_json(const nlohmann::json& src, BookRequest& dest) {
     src.at("title").get_to(dest.title);
     if (src.contains("isbn")) {
-        auto field = src.at("isbn");
+        auto& field = src.at("isbn");
         if (field != nullptr) {
             dest.isbn = field.get<std::string>();
         }
     }
     if (src.contains("authors")) {
-        auto field = src.at("authors");
+        auto& field = src.at("authors");
         if (field != nullptr) {
             dest.authors = field;
         }
     }
     if (src.contains("tags")) {
-        auto field = src.at("tags");
+        auto& field = src.at("tags");
         if (field != nullptr) {
             dest.tags = field;
         }
     }
     if (src.contains("description")) {
-        auto field = src.at("description");
+        auto& field = src.at("description");
         if (field != nullptr) {
             dest.description = field.get<std::string>();
         }
@@ -50,7 +50,7 @@ namespace jade {
 SearchRequest SearchRequest::parse(const std::string_view& raw) {
     SearchRequest out;
 
-    if (raw.size() == 0) {
+    if (raw.empty()) {
         return out;
     }
     std::stringstream literal;

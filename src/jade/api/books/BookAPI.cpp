@@ -24,7 +24,7 @@ void BookAPI::init(Server *server) {
         (std::bind(postEditBook, server, _1, _2, _3));
 }
 
-void BookAPI::getImage(Server* server, crow::request& req, crow::response& res, int bookID) {
+void BookAPI::getImage(Server* server, crow::request&, crow::response& res, int bookID) {
     auto theoreticalImgPath = server->getConfig().thumbnailCacheDir / (std::to_string(bookID) + ".jpg");
     if (!std::filesystem::exists(theoreticalImgPath)) {
         res.code = 404;
@@ -41,7 +41,7 @@ void BookAPI::getImage(Server* server, crow::request& req, crow::response& res, 
     res.set_header("Age", "0");
     res.end();
 }
-void BookAPI::getBook(Server* server, crow::request& req, crow::response& res, int bookID) {
+void BookAPI::getBook(Server* server, crow::request&, crow::response& res, int bookID) {
     auto book = server->lib->getBook(bookID);
     if (!book.has_value()) {
         res.body = "Book not found";

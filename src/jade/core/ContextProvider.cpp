@@ -13,13 +13,13 @@ crow::mustache::context ContextProvider::buildBaseContext(
     Server* serv
 ) {
     crow::mustache::context ctx = baseCtx.getContext();
-    if (contextScope & USER) {
+    if ((contextScope & USER) != 0) {
         spdlog::debug("Including user details");
         _detail::buildUserContext(ctx, req, serv);
     }
-    if (contextScope & LIBRARIES) {
+    if ((contextScope & LIBRARIES) != 0) {
         spdlog::debug("Including library details");
-        _detail::buildLibraryContext(ctx, req, serv);
+        _detail::buildLibraryContext(ctx, serv);
     }
 
     return ctx;
@@ -48,14 +48,13 @@ void _detail::buildUserContext(
 
 void _detail::buildLibraryContext(
     crow::mustache::context& ctx,
-    crow::request& req,
     Server* serv
 ) {
     auto& library = *serv->lib;
 
     std::vector<crow::json::wvalue> out;
 
-    for (auto& [id, source] : library.getSources()) {
+    for (const auto& [id, source] : library.getSources()) {
         out.push_back({
             {"ID", (int64_t) id},
             {"Location", source.dir.c_str()},

@@ -178,14 +178,14 @@ void WebProvider::getBooks(Server* server, crow::request& req, crow::response& r
 
     // Note: page IDs are assumed to be 0-indexed. The only place they should be 1-indexed is in the UI, and potentially
     // briefly in a UI-backend translation layer
-    auto pageIdStr = req.url_params.get("page");
+    auto* pageIdStr = req.url_params.get("page");
     size_t pageId = 0;
 
     if (pageIdStr != nullptr) {
         pageId = std::stoull(pageIdStr);
     }
 
-    auto searchStr = req.url_params.get("search");
+    auto* searchStr = req.url_params.get("search");
     SearchRequest searchQuery;
     if (searchStr != 0) {
         try {

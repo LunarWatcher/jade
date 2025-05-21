@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(jade)
 
 option (JADE_SANITISE "Whether or not to enable -fsanitize=undefined" OFF)
+option (JADE_LINT "Whether or not to enable clang-tidy" OFF)
 
 set (CMAKE_CXX_STANDARD 20)
 

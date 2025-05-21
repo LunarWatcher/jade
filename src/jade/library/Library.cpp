@@ -18,7 +18,8 @@ Library::Library(Server* s, pqxx::connection& conn) : serv(s) {
     pqxx::work w(conn);
     auto libraries = w.query<int64_t, std::string>("SELECT LibraryID, Location FROM Jade.Libraries");
 
-    std::transform(
+    std::transform( // NOLINT - clang-tidy whines about a potential bug in libpqxx, which I can't do anything about
+                    // anyway
         libraries.begin(), libraries.end(), 
         std::inserter(sources, sources.begin()),
         [](const auto& row) -> std::pair<int64_t, Source> {
@@ -31,7 +32,7 @@ Library::Library(Server* s, pqxx::connection& conn) : serv(s) {
         }
     );
 
-    if (sources.size() == 0) {
+    if (sources.empty()) {
         spdlog::warn("No active libraries");
     }
 
@@ -39,7 +40,7 @@ Library::Library(Server* s, pqxx::connection& conn) : serv(s) {
 }
 
 void Library::scan() {
-    ThreadCanary canary(this);
+    volatile ThreadCanary canary(this); // NOLINT
     while (true) {
         spdlog::debug("Index starting");
         for (auto& [id, source] : sources) {
@@ -77,7 +78,7 @@ void Library::scan() {
             w.abort();
         });
 
-        if (sources.size() == 0) {
+        if (sources.empty()) {
             spdlog::info("Scanner: No libraries exist to scan");
         } else {
             spdlog::debug("Index complete");

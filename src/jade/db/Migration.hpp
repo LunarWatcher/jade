@@ -18,7 +18,6 @@ public:
     Migration& pushVersion(const std::string& query);
     void exec(pqxx::connection& conn);
 
-    static void prepare(pqxx::connection& conn);
     static void prepMetatables(pqxx::connection& conn) {
         spdlog::info("Initialising migration table...");
         pqxx::work tx{conn};
