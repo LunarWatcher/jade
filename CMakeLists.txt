@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.28)
 project(jade)
 
 option (JADE_SANITISE "Whether or not to enable -fsanitize=undefined" OFF)
@@ -27,30 +27,37 @@ set(CROW_ENABLE_COMPRESSION ON CACHE STRING "" FORCE)
 FetchContent_Declare(pqxx
     GIT_REPOSITORY https://github.com/jtv/libpqxx
     GIT_TAG 8d48b64b36158a50dc6ed33001c793652065b833
+    EXCLUDE_FROM_ALL
 )
 FetchContent_Declare(crowcpp
     GIT_REPOSITORY https://github.com/CrowCpp/Crow
     #GIT_TAG v1.2.1.2
+    EXCLUDE_FROM_ALL
 )
 
 FetchContent_Declare(cpr
     GIT_REPOSITORY https://github.com/libcpr/cpr.git
     GIT_TAG 1.11.2
+    EXCLUDE_FROM_ALL
 )
 FetchContent_Declare(nlohmann
     GIT_REPOSITORY https://github.com/nlohmann/json
     GIT_TAG v3.12.0
+    EXCLUDE_FROM_ALL
 )
 FetchContent_Declare(spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog
     GIT_TAG v1.15.2
+    EXCLUDE_FROM_ALL
 )
 FetchContent_Declare(stc
     GIT_REPOSITORY https://github.com/LunarWatcher/stc
+    EXCLUDE_FROM_ALL
 )
 FetchContent_Declare(cli11
     GIT_REPOSITORY https://github.com/CLIUtils/CLI11
     GIT_TAG main
+    EXCLUDE_FROM_ALL
 )
 
 FetchContent_MakeAvailable(crowcpp
