@@ -1,6 +1,9 @@
 .cache
 .ccls-cache
 
+# The default folder for release builds and data
+dist/
+
 /config.json
 
 # Custom
