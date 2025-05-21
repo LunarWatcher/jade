@@ -48,8 +48,14 @@ sudo -u $JADE_USER make install
 # For non-interactive use, check for the PSQL_PASSWORD env variable before prompting
 if [[ "$PSQL_PASSWORD" == "" ]];
 then
+    set +x
     read -s -p "Postgres password for [postgres] user jade: " PSQL_PASSWORD
+    if [[ $? != 0 ]]; then
+        echo "Panic: failed to read password"
+        exit -2
+    fi
     echo
+    set -x
 fi
 
 # These can error out; error means stuff already exists, and is probably a consequence of the installer being re-run
@@ -77,7 +83,7 @@ server {
         # This is caused by an oddity in how Crow handles redirects. See
         #     https://github.com/CrowCpp/Crow/blob/ad337a8a868d1d6bc61e9803fc82f36c61f706de/include/crow/http_connection.h#L257
         # for the code in question
-        proxy_redirect     http://$host/ https://$host/;
+        proxy_redirect     http://\$host/ https://\$host/;
         proxy_http_version 1.1;
         proxy_set_header   Upgrade \$http_upgrade;
         proxy_set_header   Connection "upgrade";
