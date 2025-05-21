@@ -33,7 +33,7 @@ void BookAPI::getImage(Server* server, crow::request&, crow::response& res, int 
         return;
     }
 
-    res.set_static_file_info(theoreticalImgPath.string());
+    res.set_static_file_info_unsafe(theoreticalImgPath.string());
     res.set_header(
         "Content-Disposition", 
         "attachment; filename=\"" + std::to_string(bookID) + ".jpg\""
