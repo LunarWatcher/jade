@@ -92,4 +92,18 @@ EOF
 cd /opt/jade
 sudo cp etc/systemd/system/jade.service /etc/systemd/system/jade.service
 sudo mkdir -p /etc/jade
-sudo cp etc/jade/jade.example.json /etc/jade/jade.example.json
+sudo cp etc/jade/config.example.json /etc/jade/config.json
+sudo systemctl daemon-reload
+
+echo "Jade successfully installed. Next steps:"
+echo "1. Edit /etc/jade/config.json"
+echo "2. Run 'sudo systemctl start jade', and verify that it started."
+echo "\tNote that depending on how you edit config.json, you may also need to edit the following files:"
+echo "\t * /etc/systemd/system/jade.service"
+echo "\t * /etc/nginx/conf.d/jade.conf [Non-Ubuntu users may need to modify /etc/nginx/nginx.conf instead of using this file]"
+echo "\tIf any of the files have disappeared, they're available in install.sh or elsewhere in the repo: https://codeberg.org/LunarWatcher/jade"
+echo "3. Run 'sudo systemctl restart nginx'"
+echo ""
+echo "If you run into problems, feel free to open an issue on Codeberg:"
+echo "\thttps://codeberg.org/LunarWatcher/jade/issues"
+
