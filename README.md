@@ -39,7 +39,7 @@ Additionally, this is primarily intended as an extended and user-syncable.
 
 ## Installation 
 ```
-curl -L https://codeberg.org/LunarWatcher/jade/raw/branch/master/scripts/install.sh | bash
+bash <(curl -L https://codeberg.org/LunarWatcher/jade/raw/branch/master/scripts/install.sh)
 ```
 
 

@@ -53,6 +53,7 @@ then
     read -s PSQL_PASSWORD
     if [[ $? != 0 ]] || [[ "$PSQL_PASSWORD" == "" ]]; then
         echo "Panic: failed to read password"
+        echo "Did you curl | bash instead of bash <(curl)?"
         exit -2
     fi
     echo
