@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "crow/app.h"
-#include "crow/middlewares/session.h"
 #include "jade/api/APIProvider.hpp"
 #include "jade/api/books/BookAPI.hpp"
 #include "jade/core/Typedefs.hpp"

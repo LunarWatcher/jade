@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install deps
+        run: |
+          sudo apt update && sudo apt upgrade -y
+          sudo apt install -y uuid-dev libasio-dev libpq-dev postgresql
+          python3 -m pip install cmake --break-system-packages
+      - name: Print environment
+        run: |
+          cmake --version
+      - name: Run build
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          make -j $(nproc)
+      - name: Run test
+        run: |
+          cd build
+          cmake --build . --target test
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install deps
+        run: |
+          sudo apt update && sudo apt upgrade -y
+          sudo apt install -y uuid-dev libasio-dev libpq-dev postgresql
+          python3 -m pip install cmake --break-system-packages
+      - name: Print environment
+        run: |
+          cmake --version
+      - name: Run build
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DJADE_LINT=ON -DLINT_WARNINGS_ARE_ERRORS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          make -j $(nproc)
