@@ -27,6 +27,10 @@ jobs:
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           make -j $(nproc)
+      - name: Initialise database
+        run: |
+          PSQL_PASSWORD=password ./scripts/dev/dbinit.sh
+          ./scripts/dev/setup-testdb.sh
       - name: Run test
         run: |
           cd build
