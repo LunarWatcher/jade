@@ -38,6 +38,20 @@ Server::Server(const std::filesystem::path& confDir, Flags runtimeConfig) : app(
     bootstrap();
     dbMigrations();
 
+    if (this->cfg.dbName == "jadetest" && runtimeConfig.purgeDatabase) {
+        pool->acquire<void>([](auto& conn) {
+            pqxx::work w(conn);
+            w.exec("DROP SCHEMA Jade CASCADE;");
+            w.commit();
+        });
+    } else if (runtimeConfig.purgeDatabase) {
+        spdlog::warn("--purge was specified, but the database name is not jadetest. "
+                     "You've been protected from yourself, no purge has been performed. "
+                     "If you really want to purge prod, you can use scripts/dev/purge.sh, "
+                     "or copy the commands out of it and deal with it in whatever way you see "
+                     "fit. Purging prod with --purge is not supported");
+    }
+
     pool->acquire<void>([this](auto& conn) {
         lib = std::make_shared<Library>(
             this,

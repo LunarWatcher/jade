@@ -1,10 +1,23 @@
 <div class="search-wrapper flex-vertical">
-    <form class="flex-horizontal search" id="book-filter" method="get">
-        <input type="text" name="search" placeholder="..." class="flex-grow" />
-        <input type="hidden" name="page" value="0" />
-        <input type="submit" value="Search" />
+    <form class="flex-vertical search" id="book-filter" method="get">
+        <div class="flex-horizontal">
+            <input type="text" name="search" placeholder="..." class="flex-grow" />
+            <input type="hidden" name="page" value="1" />
+            <input type="submit" value="Search" />
+        </div>
+        <div class="flex-horizontal">
+            <label for="pagesize">Books per page</label>
+            <input type="number" name="pagesize"
+                min="10" max="200" class="flex-shrink"
+                placeholder="Pagesize" value="50" />
+        </div>
     </form>
+    <div class="flex-horizontal">
+        {{#Pages}}
+        <span class="flex-grow">{{TotalSingles}} books found.</span>
+        {{/Pages}}
 
-    <a href="/help/search.html" style="align-self: flex-end">(Search help)</a>
+        <a href="/help/search.html">(Search help)</a>
+    </div>
 </div>
 <hr />

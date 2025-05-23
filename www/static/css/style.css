@@ -137,7 +137,7 @@ main {
     max-width: 500px;
 }
 
-form input {
+form input, form label {
     padding: 8px;
 }
 
@@ -460,4 +460,35 @@ button.danger:hover {
     background-color: color-mix(in srgb, var(--background-danger), black 20%);
     color: white;
     box-shadow: var(--standard-shadow);
+}
+
+#paginator {
+    align-items: center;
+}
+#paginator li:not(:has(a)) {
+    padding: 16px;
+}
+#paginator li {
+    flex: 0 1 auto;
+}
+
+#paginator a, #paginator a:visited {
+    background-color: var(--background-tertiary);
+    color: var(--foreground-tertiary);
+}
+#paginator a:not(:any-link) {
+    background-color: var(--disabled-background-colour);
+    color: var(--disabled-foreground-colour);
+}
+#paginator a:hover:any-link {
+    background-color: var(--background-tertiary-active);
+}
+
+#paginator a.active, #paginator a.active:visited {
+    background-color: var(--background-secondary);
+    color: var(--foreground-secondary);
+}
+
+#paginator a.active:hover:any-link {
+    background-color: var(--background-secondary-active);
 }

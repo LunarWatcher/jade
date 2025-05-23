@@ -106,5 +106,13 @@ add_custom_target(run
 add_custom_target(test
     COMMAND tests
     DEPENDS tests
-    COMMENT "Test jade")
+    COMMENT "Test jade (backend)")
+add_custom_target(test-frontend
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
+    COMMAND SERVER_LOC=$<TARGET_FILE:jade> python3 -m unittest -b
+    COMMENT "Test jade (frontend + integration)"
+)
+add_custom_target(test-all
+    DEPENDS test test-frontend
+    COMMENT "Run backend and frontend tests")
 # vim:ft=cmake

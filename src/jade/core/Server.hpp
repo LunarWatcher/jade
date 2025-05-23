@@ -11,6 +11,7 @@ namespace jade {
 
 struct Flags {
     bool debugCrow = false;
+    bool purgeDatabase = false;
 };
 
 class Server {

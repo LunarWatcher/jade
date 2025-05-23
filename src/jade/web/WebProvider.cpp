@@ -140,7 +140,7 @@ void WebProvider::getAdminSettings(Server* server, crow::request& req, crow::res
     };
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
-        ContextProvider::USER | ContextProvider::LIBRARIES, 
+        ContextProvider::USER | ContextProvider::LIBRARIES,
         req, pageCtx, server
     );
 
@@ -157,7 +157,7 @@ void WebProvider::getHealth(Server* server, crow::request& req, crow::response& 
     };
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
-        ContextProvider::USER | ContextProvider::LIBRARIES, 
+        ContextProvider::USER | ContextProvider::LIBRARIES,
         req, pageCtx, server
     );
 
@@ -179,15 +179,30 @@ void WebProvider::getBooks(Server* server, crow::request& req, crow::response& r
     // Note: page IDs are assumed to be 0-indexed. The only place they should be 1-indexed is in the UI, and potentially
     // briefly in a UI-backend translation layer
     auto* pageIdStr = req.url_params.get("page");
+    auto* pageSizeStr = req.url_params.get("pagesize");
     size_t pageId = 0;
+    size_t pageSize = 50;
 
-    if (pageIdStr != nullptr) {
+    if (pageIdStr != nullptr && strlen(pageIdStr) > 0) {
         pageId = std::stoull(pageIdStr);
+        if (pageId != 0) {
+            pageId -= 1;
+        }
+    }
+
+    if (pageSizeStr != nullptr && strlen(pageSizeStr) > 0) {
+        pageSize = std::stoull(pageSizeStr);
+        if (pageSize > 200) {
+            pageSize = 200;
+        }
+        if (pageSize == 0) {
+            pageSize = 50;
+        }
     }
 
     auto* searchStr = req.url_params.get("search");
     SearchRequest searchQuery;
-    if (searchStr != 0) {
+    if (searchStr != nullptr) {
         try {
             searchQuery = SearchRequest::parse(searchStr);
         } catch (const std::exception& e) {
@@ -203,14 +218,14 @@ void WebProvider::getBooks(Server* server, crow::request& req, crow::response& r
 
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
-        ContextProvider::USER, 
+        ContextProvider::USER,
         req, pageCtx, server
     );
 
-    auto results = server->lib->getBooks(pageId, 50, searchQuery);
+    auto results = server->lib->getBooks(pageId, pageSize, searchQuery);
 
     if (pageId >= results.totalPages && pageId != 0) {
-        
+
         res.body = "You provided an invalid page ID to your search. Did you incorrectly edit the parameter yourself?";
         res.code = 400;
         res.end();
@@ -223,7 +238,7 @@ void WebProvider::getBooks(Server* server, crow::request& req, crow::response& r
     ctx["Pages"] = {
         {"TotalSingles", results.totalResults},
         {"Count", results.totalPages},
-        {"CurrentPage", pageId}
+        {"CurrentPage", pageId + 1}
     };
 
     res = page.render(ctx);
@@ -250,7 +265,7 @@ void WebProvider::getBookDetails(Server* server, crow::request& req, crow::respo
 
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
-        ContextProvider::USER, 
+        ContextProvider::USER,
         req, pageCtx, server
     );
 
@@ -284,7 +299,7 @@ void WebProvider::getBookReader(Server* server, crow::request& req, crow::respon
 
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
-        ContextProvider::USER, 
+        ContextProvider::USER,
         req, pageCtx, server
     );
 
@@ -306,7 +321,7 @@ void WebProvider::getLicenses(Server* server, crow::request& req, crow::response
 
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
-        ContextProvider::USER, 
+        ContextProvider::USER,
         req, pageCtx, server
     );
 
@@ -324,7 +339,7 @@ void WebProvider::getSearchHelp(Server* server, crow::request& req, crow::respon
 
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
-        ContextProvider::USER, 
+        ContextProvider::USER,
         req, pageCtx, server
     );
 

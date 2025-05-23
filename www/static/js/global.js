@@ -11,7 +11,7 @@ function initModal(/** @type {String} */ id, /** @type {Boolean} */ reloadForm) 
     }
 
     // Dialog open is a noop
-    if (elem.open) {
+   if (elem.open) {
         return false;
     }
     
@@ -37,3 +37,4 @@ function closeModal(/** @type {String} */ id) {
     
     return false;
 }
+

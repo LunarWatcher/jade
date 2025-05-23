@@ -1,5 +1,7 @@
 .cache
 .ccls-cache
+tests/target/
+tests/config/
 
 # The default folder for release builds and data
 dist/

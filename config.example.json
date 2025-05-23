@@ -2,6 +2,7 @@
     "port": 6969,
 
     "dbHost": "localhost",
+    "dbName": "jade",
     "dbPassword": "password",
     "thumbnailCacheDir": "/opt/jade/dist/thumbnail-cache"
 }

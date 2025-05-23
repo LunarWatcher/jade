@@ -112,7 +112,7 @@ Note that none of these lists are in any form of prioritised order. They're orde
 | [x] | Author search | |
 | [ ] | Sequels and prequels | |
 | [ ] | System tests | Sort of, some of the extended tests require a browser, and I do not know if I have access to a webdriver in C++. Might need to mix in some Python + Selenium for some of the tests. |
-| [ ] | GH Actions[^5] | |
+| [x] | GH Actions[^5] | |
 | [ ] | User settings | |
 | [ ] | Deleting libraries | |
 | [ ] | Age ratings, extended access controls, and extended views | |
