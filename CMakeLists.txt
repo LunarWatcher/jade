@@ -35,6 +35,10 @@ FetchContent_Declare(crowcpp
     EXCLUDE_FROM_ALL
 )
 
+
+set(ZLIB_COMPAT ON CACHE INTERNAL "" FORCE)
+set(ZLIB_ENABLE_TESTS OFF CACHE INTERNAL "" FORCE)
+
 FetchContent_Declare(cpr
     GIT_REPOSITORY https://github.com/libcpr/cpr.git
     GIT_TAG 1.11.2
@@ -110,6 +114,7 @@ add_custom_target(test
 add_custom_target(test-frontend
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
     COMMAND SERVER_LOC=$<TARGET_FILE:jade> python3 -m unittest -b
+    DEPENDS jade
     COMMENT "Test jade (frontend + integration)"
 )
 add_custom_target(test-all

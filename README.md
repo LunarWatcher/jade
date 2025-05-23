@@ -29,7 +29,7 @@ I need a reader with both web- and filesystem-based uploads with metadata change
 * C++20 compiler
 * Linux
 * OpenSSL
-* libpq (Debian: `libpq-dev`)
+* libpq, zlib (Debian: `libpq-dev zlib1g`)
 * PostgreSQL (not necessarily on the same server)
 * CMake 3.28 or newer
 * calibre[^1], installed via your system package manager (See: https://github.com/kovidgoyal/calibre?tab=readme-ov-file#calibre-package-versions-in-various-repositories)
@@ -86,7 +86,21 @@ Run `/opt/jade/scripts/update.sh`. The script takes care of the rest. If you use
 
 ## Development setup
 
-TODO 
+TODO
+
+### Running tests
+
+If you're using the Firefox snap (my sincerest condolences), Selenium will not cooperate. You may need to explicitly define the following environment variable:
+```
+export SE_GECKODRIVER=/snap/bin/geckodriver
+```
+
+Otherwise, a number of different Selenium-related bugs will occur, that will cause the tests to erroneously fail. Some failure modes include:
+
+* Timeouts during the test, specifically when creating the browser
+* Various errors ("binary is not a firefox executable", "the geckodriver detected in PATH may not be compatbile with the detected firefox version")
+    * The incompatible versions may appear regardless, because Ubuntu's snap is horseshit, out of date, and contain unsynced  geckodriver and firefox
+* Outright failure to find Firefox and/or Geckodriver
 
 ## Planned  features
 
