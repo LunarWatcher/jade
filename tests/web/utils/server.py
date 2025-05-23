@@ -56,6 +56,7 @@ class Server:
                 j["dbName"] = "jadetest";
                 j["dbPassword"] = os.environ["PSQL_PASSWORD"]
                 j["port"] = PORT
+                j["thumbnailCacheDir"] = "/"
                 if j["dbPassword"] is None:
                     raise RuntimeError("Missing PSQL_PASSWORD environment variable")
 

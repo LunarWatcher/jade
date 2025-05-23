@@ -37,6 +37,9 @@ jobs:
         run: |
           cd build
           cmake --build . --target test
+      - uses: browser-actions/setup-geckodriver@latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup headless display
         uses: pyvista/setup-headless-display-action@v4
       - name: Run frontend and integration tests
