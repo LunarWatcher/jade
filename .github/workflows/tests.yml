@@ -17,7 +17,7 @@ jobs:
       - name: Install deps
         run: |
           sudo apt update && sudo apt upgrade -y
-          sudo apt install -y uuid-dev libasio-dev libpq-dev postgresql firefox
+          sudo apt install -y uuid-dev libasio-dev libpq-dev postgresql
           python3 -m pip install cmake --break-system-packages
           python3 -m pip install -r tests/requirements.txt --break-system-packages
       - name: Print environment
@@ -37,6 +37,7 @@ jobs:
         run: |
           cd build
           cmake --build . --target test
+      - uses: browser-actions/setup-firefox@v1
       - uses: browser-actions/setup-geckodriver@latest
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
