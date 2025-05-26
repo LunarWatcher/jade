@@ -26,7 +26,7 @@ I need a reader with both web- and filesystem-based uploads with metadata change
 
 
 ## Requirements
-* C++20 compiler
+* C++20 compiler and general compilation packages for your distro
 * Linux
 * OpenSSL
 * libpq, zlib (Debian: `libpq-dev zlib1g`)
@@ -157,7 +157,7 @@ $ make test-all
 
 **Note:** Several of the frontend tests require the `jade` executable. It's automatically built when you run `test-frontend` in CMake, and its location is automatically provided when the tests are run. 
 
->[!WARNING] For Ubuntu users
+>[!WARNING]
 > 
 > If you're using the Firefox snap (my sincerest condolences), Selenium will not cooperate. You will likely need to explicitly define the following environment variable:
 > ```bash
@@ -194,13 +194,13 @@ Note that none of these lists are in any form of prioritised order. They're orde
 | [x] | Tag search | |
 | [x] | Author search | |
 | [ ] | Sequels and prequels | |
-| [ ] | System tests | Sort of, some of the extended tests require a browser, and I do not know if I have access to a webdriver in C++. Might need to mix in some Python + Selenium for some of the tests. |
+| [x] | System tests | Sort of, some of the extended tests require a browser, and I do not know if I have access to a webdriver in C++. Might need to mix in some Python + Selenium for some of the tests. |
 | [x] | GH Actions[^5] | |
 | [ ] | User settings | |
 | [ ] | Deleting libraries | |
 | [ ] | Age ratings, extended access controls, and extended views | |
 | [ ] | A front page that isn't blank | |
-| [ ] | Pagination + search retention bug | |
+| [x] | Pagination + search retention bug | |
 
 ### Side projects for Later:tm:
 
