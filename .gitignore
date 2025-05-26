@@ -5,6 +5,7 @@ tests/config/
 
 # The default folder for release builds and data
 dist/
+.env
 
 /config.json
 

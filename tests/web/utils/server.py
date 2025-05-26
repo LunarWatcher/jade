@@ -12,6 +12,7 @@ class Server:
         purge: bool = True,
         config_dir = "./config/default"
     ):
+        self.load_config()
         self.server_loc = os.environ["SERVER_LOC"]
         self.config_dir = config_dir
         if self.server_loc is None:
@@ -25,6 +26,21 @@ class Server:
                                "likely not /tests. You're probably not using "
                                "CMake when you should be")
         self.start(purge)
+
+    def load_config(self):
+        self.config = {}
+        logger.info("Loading ../.env")
+        with open("../.env") as f:
+            for line in f.readlines():
+                if (line.startswith("#")):
+                    continue
+                elif ("=" not in line):
+                    continue
+
+                (key, val) = line.split("=", 1)
+
+                self.config[key] = val
+        logger.info("../.env successfully loaded.")
 
     def start(self, purge: bool = True):
         self.server = subprocess.Popen(
@@ -54,7 +70,7 @@ class Server:
                 j = json.load(src)
 
                 j["dbName"] = "jadetest";
-                j["dbPassword"] = os.environ["PSQL_PASSWORD"]
+                j["dbPassword"] = self.config["PSQL_PASSWORD"]
                 j["port"] = PORT
                 j["thumbnailCacheDir"] = "/"
                 if j["dbPassword"] is None:

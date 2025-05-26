@@ -90,17 +90,86 @@ TODO
 
 ### Running tests
 
-If you're using the Firefox snap (my sincerest condolences), Selenium will not cooperate. You may need to explicitly define the following environment variable:
+There are two kinds of tests; frontend and backend tests. They're all run via CMake, with one of the following three targets:
+
+* `test`: Runs backend tests
+* `test-frontend`: Runs frontend and integration tests
+* `test-all`: Runs both frontend and backend tests
+
+> [!WARNING]
+>
+> Both test types have some special requirements. Failure to read this section in its entirety before running the tests **will** result in test failures.
+
+#### Common requirements
+
+One of the common requirements is access to a Postgres instance with a special database (`jadetest`). By default, the same user is used for both prod and tests. If you're comfortable creating these tables yourself, you're likely already setting up the database and a user. If you're not (or you're like me and can't be bothered writing out), you can run the following two scripts:
 ```
-export SE_GECKODRIVER=/snap/bin/geckodriver
+./scripts/dev/dbinit.sh
+./scripts/dev/setup-testdb.sh
 ```
 
-Otherwise, a number of different Selenium-related bugs will occur, that will cause the tests to erroneously fail. Some failure modes include:
+Note that the first script will not just create the user, but also create the `jade` database for running local debug instances. For the first script, you can also supply a `PSQL_PASSWORD` environment variable if you don't want to be interactively prompted for a password.
 
-* Timeouts during the test, specifically when creating the browser
-* Various errors ("binary is not a firefox executable", "the geckodriver detected in PATH may not be compatbile with the detected firefox version")
-    * The incompatible versions may appear regardless, because Ubuntu's snap is horseshit, out of date, and contain unsynced  geckodriver and firefox
-* Outright failure to find Firefox and/or Geckodriver
+While the `PSQL_PASSWORD` variable is optional for the `dbinit` script, it is _required_ for both the frontend and backend tests. However, unlike for the `dbinit.sh` script, there's a conveniently provided `.env` file.
+
+With the project folder as the working directory:
+```
+cp .env.template .env
+```
+
+Edit it, and populate the variables. Currently, only `PSQL_PASSWORD` is supported. Note that the tests assume the database is available at `localhost:5432`, and do not currently support configuring it to point elsewhere.
+
+> [!WARNING]
+>
+> The `test-all` target has been specially defined to only run one test at a time. DO NOT run the frontend and backend tests concurrently. Part of the test setup includes several database wipes, which will result in frontend and backend tests colliding and erroneously failing.
+
+
+#### Running backend tests
+
+The backend tests have some of the fewest requirements. If you can build and run Jade, you can build and run the tests. There are no special requirements beyond the common requirements described in the previous section. You can just run
+```
+make test
+```
+(Or `make test-all`, but see "Running frontend tests" first)
+
+and let it do its thing.
+
+#### Running frontend tests
+
+To run the frontend tests, you need:
+* Python 3
+* A working display of some kind. This does **not** need to be a real display if you're in a headless environment. Use [xvfb](https://wiki.archlinux.org/title/Xinit#Running_in_a_virtual_server) if you're on Xorg, and switch to xorg if you're on wayland[^6]. Xvfb is also useful regardless, as it lets you do anything else while the tests run. The frontend tests do take quite a bit longer to run than the backend tests due to browser and navigation overhead.
+* Firefox and geckodriver; however, you need Linux to run any of this, so odds are good you have it already. Geckodriver comes presinstalled with firefox in most (?) cases, so on most consumer distros, you probably don't need to worry about this requirement.
+
+Using `build/` as your working directory:
+```bash
+# Optional: create a venv
+$ python3 -m venv env
+$ source env/bin/activate
+# Required:
+# Note that users of ubuntu or derivatives need to pass --break-system-packages without a venv.
+# Also note that doing so can break  your system packages, so be aware of the risks before you do this.
+$ pip3 install -r ../tests/requirements.txt
+$ make test-frontend
+# Or, alternatively, to also run backend tests (please see "Running backend tests" first):
+$ make test-all
+```
+
+**Note:** Several of the frontend tests require the `jade` executable. It's automatically built when you run `test-frontend` in CMake, and its location is automatically provided when the tests are run. 
+
+>[!WARNING] For Ubuntu users
+> 
+> If you're using the Firefox snap (my sincerest condolences), Selenium will not cooperate. You will likely need to explicitly define the following environment variable:
+> ```bash
+> export SE_GECKODRIVER=/snap/bin/geckodriver
+> ```
+> 
+> Otherwise, a number of different Selenium-related bugs will occur, that will cause the tests to erroneously fail. Some failure modes include:
+> 
+> * Timeouts during the test, specifically when creating the browser
+> * Various errors ("binary is not a firefox executable", "the geckodriver detected in PATH may not be compatbile with the detected firefox version")
+>   * The incompatible versions may appear regardless, because Ubuntu's snap is horseshit, out of date, and contain unsynced  geckodriver and firefox
+> * Outright failure to find Firefox and/or Geckodriver
 
 ## Planned  features
 
@@ -142,3 +211,4 @@ Note that none of these lists are in any form of prioritised order. They're orde
 [^3]: If you don't want SSL, this must be removed from `/etc/nginx/conf.d/jade.conf` after the fact. Other changes to nginx must be made manually in this file as well, for example if you don't want `ebooks.your-domain`
 [^4]: In an early version, Jade used a whole 17MB of RAM while idle. Kavita immediately after installation uses nearly 400MB, and around 800MB in a prod-ish environment on my server. RAM does increase when loading books, but this is inevitable in both cases. Currently, Jade appears to be streaming the books, so even loading a 330MB PDF didn't bring Jade over 20MB.
 [^5]: Funnily enough, even though this is a project mainly hosted on Codeberg, I plan to use GitHub Actions to avoid using Codeberg's resources.
+[^6]: Wayland, at the time of writing, does not seem to have a viable alternative to Xvfb. XWayland may allow Xvfb to continue working, but native Wayland does not have a single good alternative that I can just point to and call it a day. If you prever Wayland so much you're using it in a headless environment, you can probably figure this out on your own. If you can't, switch back to Xorg while Wayland figures out its shit.

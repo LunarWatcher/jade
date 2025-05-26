@@ -33,6 +33,11 @@ jobs:
           sudo systemctl start postgresql
           PSQL_PASSWORD=password ./scripts/dev/dbinit.sh
           ./scripts/dev/setup-testdb.sh
+      - name: Setup .env
+        run: |
+          tee .env << EOF
+          PSQL_PASSWORD=password
+          EOF
       - name: Run backend tests
         run: |
           cd build
