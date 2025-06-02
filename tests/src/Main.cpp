@@ -2,6 +2,7 @@
 #include "spdlog/spdlog.h"
 #include "stc/StringUtil.hpp"
 #include <fstream>
+#include <spdlog/cfg/env.h>
 #include <stdexcept>
 #include <string>
 
@@ -9,6 +10,8 @@
 #include "catch2/catch_session.hpp"
 
 int main(int argc, const char* argv[]) {
+    // TODO: is there ever a reason to run tests without debug logs?
+    spdlog::cfg::load_env_levels();
 
     spdlog::info("Loading .env...");
 

@@ -102,7 +102,7 @@
         <div class="flex-vertical">
             <div class="tag-container flex-horizontal">
                 {{#Book.Tags}}
-                <span class="tag">{{Name}}</span>
+                <span class="tag" data-rawtag="{{Name}}"></span>
                 {{/Book.Tags}}
             </div>
             {{#Book.Description}}
@@ -115,3 +115,12 @@
     </div>
 
 </div>
+
+<script>
+for (let elem of document.getElementsByClassName("tag")) {
+    let tagName = elem.getAttribute("data-rawtag");
+    if (tagName !== null && elem.innerText != "") {
+        elem.innerText = tagName.replace("_", " ");
+    }
+}
+</script>

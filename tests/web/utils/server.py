@@ -46,6 +46,7 @@ class Server:
         self.server = subprocess.Popen(
             [
                 self.server_loc,
+                "run",
                 "--purge",
                 "true" if purge else "false",
                 "--override-config",

@@ -3,6 +3,7 @@
 #include "jade/data/BookRequests.hpp"
 #include "jade/data/db/Book.hpp"
 #include "jade/health/HealthCheck.hpp"
+#include "jade/util/InterruptableThread.hpp"
 #include <map>
 #include <optional>
 #include <pqxx/pqxx>
@@ -58,7 +59,7 @@ private:
     
     std::shared_mutex m;
 
-    std::thread runner;
+    InterruptableThread* runner;
     bool runnerDead = false;
 
     Server* serv;
@@ -107,6 +108,12 @@ public:
     };
 
     Library(Server* s, pqxx::connection& conn);
+    ~Library() {
+        if (runner) {
+            runner->kill();
+            delete runner;
+        }
+    }
 
     void initScanProcess();
     
@@ -121,6 +128,7 @@ public:
     std::vector<health::HealthResult> checkHealth() override;
 
     std::optional<BookType> validateExtension(const std::filesystem::path& p);
+    bool requestRefresh();
 
     /**
      * Returns a vector of Books. 

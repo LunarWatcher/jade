@@ -4,6 +4,8 @@ add_library(jadesrc STATIC
     jade/api/books/BookAPI.cpp
     jade/api/settings/SettingsAPI.cpp
 
+    jade/cli/CLIMigrations.cpp
+
     jade/conf/ServerConfig.cpp
 
     jade/core/ContextProvider.cpp
@@ -26,6 +28,7 @@ add_library(jadesrc STATIC
     jade/server/CacheHelper.cpp
     jade/server/SessionMiddleware.cpp
 
+    jade/util/InterruptableThread.cpp
     jade/util/ResponseUtil.cpp
 
     jade/web/WebProvider.cpp
@@ -38,14 +41,13 @@ add_executable(jade jade/Main.cpp)
 target_link_libraries(jadesrc
 PUBLIC
     stc
-    zlib
     cpr::cpr
     spdlog::spdlog
     nlohmann_json::nlohmann_json
     Crow::Crow
     OpenSSL::Crypto
     CLI11::CLI11
-    pqxx
+    libpqxx::pqxx
 )
 
 target_include_directories(jadesrc PUBLIC ./)

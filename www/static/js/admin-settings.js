@@ -30,3 +30,19 @@ function addLibrary(ev) {
         });
 
 }
+
+function reindex() {
+    callAPI(
+        "admin/reindex",
+        "POST",
+        null,
+        {
+            202: () => {
+                showDialog("Reindex requested successfully.");
+            },
+            422: () => {
+                showDialog("Reindex has already been requested, and is being processed.");
+            }
+        }
+    )
+}

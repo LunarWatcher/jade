@@ -3,6 +3,7 @@
 #include "crow/json.h"
 #include <string>
 #include <vector>
+#include <filesystem>
 
 namespace jade {
 

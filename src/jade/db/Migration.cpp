@@ -1,23 +1,15 @@
 #include "Migration.hpp"
+#include "jade/db/migrations/00Order.hpp"
 
 namespace jade {
 
-Migration& Migration::pushVersion(const std::string& query) {
-    queries.push_back(query);
-
-    return *this;
-}
-
-void Migration::exec(pqxx::connection& conn) {
-    pqxx::work work(conn);
-    spdlog::debug("Preparing migration...");
-
-    auto res = work.exec(
+int64_t Migration::getCurrentVersion(pqxx::work& tx) {
+    auto res = tx.exec(
         "SELECT Version FROM Jade.Migration WHERE Name = $1",
         pqxx::params { IDENTIFIER }
     );
     
-    long long currVersion = 0;
+    int64_t currVersion = 0;
     if (!res.empty()) {
         // If there is a result, ensure it's a long long. 
         //currVersion = res.at(0).at(0).get<long long>().value_or(-1);
@@ -27,22 +19,61 @@ void Migration::exec(pqxx::connection& conn) {
             throw std::runtime_error("Panic (programmer error/host error): invalid version stored in database. Wipe database");
         }
     }
-    if ((size_t) currVersion == queries.size()) {
-        spdlog::info("Migrations up to date (v{})", currVersion);
+    return currVersion;
+}
+
+void Migration::upgrade(pqxx::connection& conn) {
+    pqxx::work work(conn);
+    spdlog::debug("Preparing migration...");
+
+    auto currVersion = getCurrentVersion(work);
+    auto queries = getMigrations();
+    if ((size_t) currVersion == queries->size()) {
+        spdlog::info("Migrations up to date (latest is v{}; {})", currVersion, queries->back()->name());
         return;
     }
 
-    for (size_t i = currVersion; i < queries.size(); ++i) {
-        spdlog::info("{} to v{}", i == 0 ? "Initialising" : "Updating", i + 1);
-        work.exec(queries.at(i));
+    for (size_t i = currVersion; i < queries->size(); ++i) {
+        auto& query = queries->at(i);
+        spdlog::info("Upgrading to {} (v{})", query->name(), i + 1);
+        query->upgrade(work);
     }
 
     work.exec(
         "INSERT INTO Jade.Migration (Name, Version) VALUES ($1, $2) ON CONFLICT (Name) DO UPDATE SET Version = $2;",
-        pqxx::params { IDENTIFIER, this->queries.size() }
+        pqxx::params {
+            IDENTIFIER,
+            queries->size() 
+        }
     );
 
     work.commit();
+}
+
+void Migration::downgrade(pqxx::connection& conn, int64_t downgradeTo) {
+    pqxx::work tx(conn);
+
+    auto currVersion = getCurrentVersion(tx);
+    if (currVersion == 0) {
+        spdlog::error("Downgrade failed: no versions to downgrade");
+        throw std::runtime_error("Nothing to drop");
+    }
+    auto targetVersion = downgradeTo < 0 ? currVersion - downgradeTo : (downgradeTo > 0 ? downgradeTo - 1 : 0);
+    if (targetVersion < 0) {
+        spdlog::error(
+            "Cannot roll back {} revisions; there are only {} installed revisions",
+            downgradeTo, currVersion
+        );
+        throw std::runtime_error("Bad target version");
+    }
+
+    auto migrations = getMigrations();
+    for (int64_t i = currVersion - 1; i >= targetVersion; --i) {
+        migrations->at(i)->downgrade(tx);
+        spdlog::info("Downgraded v{} ({})", i + 1, migrations->at(i)->name());
+    }
+
+    tx.commit();
 }
 
 }

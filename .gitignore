@@ -2,10 +2,12 @@
 .ccls-cache
 tests/target/
 tests/config/
+/CMakeUserPresets.json
 
 # The default folder for release builds and data
 dist/
 .env
+/env/
 
 /config.json
 

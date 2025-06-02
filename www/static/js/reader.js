@@ -275,6 +275,12 @@ class Reader {
         } else if (k == "Escape" || k == "e") {
             this.closeSidebar();
             this.setFocus(null);
+        } else if (k == "i") {
+
+            this.view?.renderer.setAttribute(
+                "zoom", 
+                (parseFloat(this.view?.renderer.getAttribute("zoom") || 1) + 0.1).toString()
+            )
         }
     }
     #onLoad({ detail: { doc } }) {

@@ -1,6 +1,7 @@
 add_executable(tests 
     src/Main.cpp
 
+    src/unit/InterruptableThread.cpp
     src/unit/SearchParsing.cpp
 )
 

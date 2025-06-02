@@ -38,3 +38,36 @@ function closeModal(/** @type {String} */ id) {
     return false;
 }
 
+function callAPI(endpoint, method, body, statusHandlers) {
+    fetch("/api/" + endpoint, {
+        method: method || "GET",
+        body: JSON.stringify(body),
+        credentials: "include"
+    })
+        .then(res => {
+            // First, check for special handlers. These can do whatever.
+            if (statusHandlers && statusHandlers[res.status]) {
+                statusHandlers[res.status]();
+                return;
+            }
+            // If no special handlers are available, default to standard checks.
+            // 200-299: Refresh
+            // 404: Custom error message (JSON return is not guaranteed)
+            // >=400 (except 404): The value of the "message" field in the JSON response is displayed.
+            if (res.status >= 400) {
+                if (res.status == 404) {
+                    showDialog("The requested endpoint does not exist (programmer error), or you do not have the permissions required to use it.");
+                } else {
+                    res.json().then(json => {
+                        showDialog("An error occurred while processing your request: " + json["body"]);
+                    });
+                }
+            } else if (res.status >= 200 && res.status < 300) {
+                location.reload();
+            }
+        })
+        .catch(err => {
+            showDialog("Failed to connect to the server. Try again later");
+            console.error(err);
+        })
+}

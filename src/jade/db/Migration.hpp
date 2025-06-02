@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <string>
 #include <spdlog/spdlog.h>
 
@@ -10,15 +9,20 @@ namespace jade {
 
 class Migration {
 private:
-    std::vector<std::string> queries;
     static inline std::string IDENTIFIER = "__jade_migration_version__";
 
 public:
-    
-    Migration& pushVersion(const std::string& query);
-    void exec(pqxx::connection& conn);
+    void upgrade(pqxx::connection& conn);
+    void downgrade(pqxx::connection& conn, int64_t downgradeTo = 0);
+
+    int64_t getCurrentVersion(pqxx::work& tx);
 
     static void prepMetatables(pqxx::connection& conn) {
+        {
+            pqxx::work tx{conn};
+            tx.exec("CREATE SCHEMA IF NOT EXISTS Jade");
+            tx.commit();
+        }
         spdlog::info("Initialising migration table...");
         pqxx::work tx{conn};
         tx.exec(R"(

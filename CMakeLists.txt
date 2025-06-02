@@ -1,4 +1,13 @@
 cmake_minimum_required(VERSION 3.28)
+
+include(FetchContent)
+FetchContent_Declare(conan
+    GIT_REPOSITORY https://github.com/conan-io/cmake-conan
+    GIT_TAG develop2
+)
+FetchContent_MakeAvailable(conan)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${conan_SOURCE_DIR}/conan_provider.cmake)
+
 project(jade)
 
 option (JADE_SANITISE "Whether or not to enable -fsanitize=undefined" OFF)
@@ -10,72 +19,31 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-list (PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
-
-include(FetchContent)
+set(CONAN_INSTALL_ARGS "--build=missing" "-druntime_deploy" "--deployer-folder=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CURL_ZLIB ON CACHE STRING "" FORCE)
-set(SPDLOG_USE_STD_FORMAT ON CACHE STRING "" FORCE)
 
-# TODO: Check if newer versions of crow axed CROW_FEATURES
-set(CROW_FEATURES ssl compression CACHE STRING "" FORCE)
-set(CROW_INSTALL OFF CACHE STRING "" FORCE)
-set(CROW_ENABLE_COMPRESSION ON CACHE STRING "" FORCE)
+list (PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 
-FetchContent_Declare(pqxx
-    GIT_REPOSITORY https://github.com/jtv/libpqxx
-    GIT_TAG 8d48b64b36158a50dc6ed33001c793652065b833
-    EXCLUDE_FROM_ALL
-)
-FetchContent_Declare(crowcpp
-    GIT_REPOSITORY https://github.com/CrowCpp/Crow
-    #GIT_TAG v1.2.1.2
-    EXCLUDE_FROM_ALL
-)
 
-
-set(ZLIB_COMPAT ON CACHE INTERNAL "" FORCE)
-set(ZLIB_ENABLE_TESTS OFF CACHE INTERNAL "" FORCE)
-
-FetchContent_Declare(cpr
-    GIT_REPOSITORY https://github.com/libcpr/cpr.git
-    GIT_TAG 1.11.2
-    EXCLUDE_FROM_ALL
-)
-FetchContent_Declare(nlohmann
-    GIT_REPOSITORY https://github.com/nlohmann/json
-    GIT_TAG v3.12.0
-    EXCLUDE_FROM_ALL
-)
-FetchContent_Declare(spdlog
-    GIT_REPOSITORY https://github.com/gabime/spdlog
-    GIT_TAG v1.15.2
-    EXCLUDE_FROM_ALL
-)
 FetchContent_Declare(stc
     GIT_REPOSITORY https://github.com/LunarWatcher/stc
     EXCLUDE_FROM_ALL
 )
-FetchContent_Declare(cli11
-    GIT_REPOSITORY https://github.com/CLIUtils/CLI11
-    GIT_TAG main
-    EXCLUDE_FROM_ALL
-)
 
-FetchContent_MakeAvailable(crowcpp
-    pqxx
-    nlohmann
-    spdlog
-    cpr
+FetchContent_MakeAvailable(
     stc
-    cli11
 )
 
 find_package(OpenSSL REQUIRED)
+find_package(Crow REQUIRED)
+find_package(cpr REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(CLI11 REQUIRED)
+find_package(libpqxx REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
-add_definitions(-DCROW_ENFORCE_WS_SPEC=1)
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_definitions(-DJADE_DEBUG=1)
 endif()
@@ -104,7 +72,7 @@ add_subdirectory(src)
 add_subdirectory(tests EXCLUDE_FROM_ALL)
 
 add_custom_target(run
-    COMMAND jade
+    COMMAND jade run
     DEPENDS jade
     COMMENT "Run jade")
 add_custom_target(test

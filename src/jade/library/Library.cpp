@@ -1,6 +1,7 @@
 #include "Library.hpp"
 #include "jade/data/BookRequests.hpp"
 #include "jade/health/HealthCheck.hpp"
+#include "jade/util/InterruptableThread.hpp"
 #include "spdlog/spdlog.h"
 #include <cctype>
 #include <filesystem>
@@ -88,9 +89,10 @@ void Library::scan() {
 }
 
 void Library::initScanProcess() {
-    runner = std::move(std::thread(
-        std::bind(&Library::scan, this)
-    ));
+    runner = new InterruptableThread {
+        std::bind(&Library::scan, this),
+        std::chrono::minutes(60)
+    };
 }
 
 bool Library::createLibrary(Server* serv, const std::string& location) {
@@ -127,9 +129,10 @@ bool Library::createLibrary(Server* serv, const std::string& location) {
 std::vector<health::HealthResult> Library::checkHealth() {
     std::vector<health::HealthResult> out;
 
-    {
-        std::vector<health::HealthCheck> sourceChecks;
+    std::vector<health::HealthCheck> sourceChecks;
 
+    {
+        std::shared_lock l(m);
         for (auto& [id, source] : this->sources) {
             auto isValid = source.isValid();
             sourceChecks.push_back({
@@ -138,19 +141,18 @@ std::vector<health::HealthResult> Library::checkHealth() {
                 isValid ? "" : "Path does not exist, or is not a directory"
             });
         }
-
-        sourceChecks.push_back({
-            !runnerDead,
-            "Library scanner thread",
-            runnerDead ? "Defunct" : "Running"
-        });
-
-        out.push_back({
-            "Library sources",
-            sourceChecks
-        });
-
     }
+
+    sourceChecks.push_back({
+        !runnerDead,
+        "Library scanner thread",
+        runnerDead ? "Defunct" : "Running"
+    });
+
+    out.push_back({
+        "Library sources",
+        sourceChecks
+    });
 
     return out;
 }
@@ -186,7 +188,8 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
                     std::vector {
                         metaCommand.c_str(),
                         strPath.c_str()
-                    }
+                    },
+                    &code
                 );
 
                 std::string title;
@@ -201,7 +204,7 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
                         }
                     }
                 } else {
-                    spdlog::error("ebook-meta failed: {}", output);
+                    spdlog::error("ebook-meta failed (code = {}): {}", code, output);
                 }
 
                 auto res = w.exec(
@@ -485,6 +488,10 @@ std::optional<BookType> Library::validateExtension(const std::filesystem::path& 
     }
 
     return it->second;
+}
+
+bool Library::requestRefresh() {
+    return true;
 }
 
 bool Library::isBookPageNumberValid(size_t page, size_t pagesize, std::optional<int64_t> libraryId) {

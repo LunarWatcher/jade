@@ -9,8 +9,14 @@
     flex: 0 1 auto;
 }
 
+#reader-wrapper {
+    display: block;
+    height: 100%;
+    overflow: auto;
+}
+
 foliate-view {
-    flex: 1 0 auto !important;
+    display: inline-block;
 }
 
 main {

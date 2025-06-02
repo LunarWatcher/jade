@@ -1,6 +1,8 @@
 #pragma once
 
 #include <filesystem>
+#include <fstream>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <nlohmann/json.hpp>
 
@@ -45,6 +47,7 @@ struct ServerConfig {
             std::filesystem::create_directories(thumbnailCacheDir);
         }
     }
+
 };
 
 inline void from_json(const nlohmann::json& i, ServerConfig& o) {
@@ -65,6 +68,19 @@ inline void from_json(const nlohmann::json& i, ServerConfig& o) {
     if (i.contains("thumbnailCacheDir")) {
         i.at("thumbnailCacheDir").get_to(o.thumbnailCacheDir);
     }
+}
+
+static void loadConfig(ServerConfig& cfg, const std::filesystem::path& confDir) {
+    std::ifstream f(confDir / "config.json");
+
+    if (!f) {
+        throw std::runtime_error("Failed to load " + confDir.string() + "/config.json");
+    }
+
+    nlohmann::json j;
+    f >> j;
+    j.get_to(cfg);
+    spdlog::debug("Loaded config from {}/config.json", confDir.string());
 }
 
 }
