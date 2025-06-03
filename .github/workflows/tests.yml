@@ -11,9 +11,17 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@main
-      - uses: actions/setup-python@v5
+      # Should not be necessary, looks like setup-conan invokes this automagically
+      #- uses: actions/setup-python@v5
+        #with:
+          #python-version: '3.12'
+      - name: Install Conan
+        uses: conan-io/setup-conan@v1
         with:
-          python-version: '3.12'
+          python_Version: '3.12'
+      - name: Patch conan remotes
+        run: |
+          conan remote update conancenter --url https://center2.conan.io
       - name: Install deps
         run: |
           sudo apt update && sudo apt upgrade -y
