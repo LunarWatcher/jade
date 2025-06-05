@@ -16,7 +16,8 @@
 }
 
 foliate-view {
-    display: inline-block;
+    display: block;
+    height: 100%;
 }
 
 main {
