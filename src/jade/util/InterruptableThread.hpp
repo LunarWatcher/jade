@@ -18,6 +18,7 @@ private:
     std::function<void()> callback;
     std::chrono::seconds cycleTimeout;
 
+    void run();
 public:
     InterruptableThread() = default;
     InterruptableThread(
@@ -28,7 +29,6 @@ public:
 
     ~InterruptableThread();
 
-    void run();
     bool interrupt();
     void kill() { 
         if (!running) {
