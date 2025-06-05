@@ -40,6 +40,8 @@ source ./env/bin/activate
 pip3 install conan
 
 # Configure /opt/jade/dist permissions
+# Doing this makes sure root doesn't make /opt/jade/dist, which would fuck over permissions
+# and make chowning it _very_ annoying
 mkdir /opt/jade/dist
 # I don't think -R is necessary, but whatever
 sudo chown -R $JADE_USER /opt/jade/dist

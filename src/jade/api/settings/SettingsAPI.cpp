@@ -34,10 +34,10 @@ void Settings::postCreateLibrary(Server *server, crow::request &req, crow::respo
     auto r = parseRes.value();
 
     if (r.location.empty() || !r.location.starts_with("/")) {
-        res = JSONResponse(MessageResponse(
+        res = JSONResponse {MessageResponse {
             "Malformed path. Note: if you supplied a relative path, these are not supported. "
             "Your path MUST be an absolute path."
-        ));
+        }};
         res.code = crow::BAD_REQUEST;
         res.end();
         return;
