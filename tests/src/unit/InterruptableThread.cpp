@@ -55,7 +55,9 @@ TEST_CASE("Validate long interrupts") {
     jade::InterruptableThread t(
         [&]() {
             std::unique_lock l(m);
+            spdlog::info("Test::Pre-wait");
             interrupt->wait_for(l, std::chrono::seconds(60));
+            spdlog::info("Test::Post-wait");
             ++counter;
         },
         std::chrono::minutes(60)
@@ -79,8 +81,10 @@ TEST_CASE("Validate long interrupts") {
     }
 
     REQUIRE(t.interrupt());
+    REQUIRE(counter == 1);
     INFO("Note: expecting next REQUIRE_FALSE to be for the repeat check");
     REQUIRE_FALSE(t.interrupt());
+    REQUIRE(counter == 1);
 
     std::this_thread::sleep_for(300ms);
     // The test interrupt needs to be manually ntoified here, so the inner thread can release in .kill()
@@ -90,6 +94,7 @@ TEST_CASE("Validate long interrupts") {
 
     // Killing the thread should not affect the counter at this point, since the timeout won't have elapsed, and no
     // further interrupts have been requested
+    interrupt->notify_all();
     t.kill();
     std::this_thread::sleep_for(300ms);
     REQUIRE(counter == 2);
