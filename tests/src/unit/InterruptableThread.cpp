@@ -52,7 +52,10 @@ TEST_CASE("Validate long interrupts") {
         }
     };
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    {
+        std::unique_lock l(counterMutex);
+        REQUIRE(t.mainSync.wait_for(l, std::chrono::seconds(3)) != std::cv_status::timeout);
+    }
     // Once the initial setup time is cleared, the thread will be stuck on the nested interrupt
     // This means `t.interrupt()` should return false
     REQUIRE_FALSE(t->interrupt());
@@ -60,7 +63,10 @@ TEST_CASE("Validate long interrupts") {
 
     // And once the load suddenly disappears, it should work, then cease to work
     t.doMetaInterrupt();
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    {
+        std::unique_lock l(counterMutex);
+        REQUIRE(t.mainSync.wait_for(l, std::chrono::seconds(3)) != std::cv_status::timeout);
+    }
     {
         // The lock should now be released, and counter set to 1. The first cycle has cleared
         std::unique_lock l(t.metaMutex, std::try_to_lock);
@@ -71,20 +77,18 @@ TEST_CASE("Validate long interrupts") {
     REQUIRE(t->interrupt());
     {
         std::unique_lock l(counterMutex);
-        REQUIRE(counter == 1);
-    }
-    INFO("Note: expecting next REQUIRE_FALSE to be for the repeat check");
-    REQUIRE_FALSE(t->interrupt());
-    {
-        std::unique_lock l(counterMutex);
+        REQUIRE(t.mainSync.wait_for(l, std::chrono::seconds(3)) != std::cv_status::timeout);
         REQUIRE(counter == 1);
     }
 
+    INFO("Note: expecting next REQUIRE_FALSE to be for the repeat check");
+    REQUIRE_FALSE(t->interrupt());
+
     // The test interrupt needs to be manually ntoified here, so the inner thread can release in .kill()
-    t.doMetaInterrupt();
-    std::this_thread::sleep_for(300ms);
     {
         std::unique_lock l(counterMutex);
+        t.doMetaInterrupt();
+        REQUIRE(t.mainSync.wait_for(l, std::chrono::seconds(3)) != std::cv_status::timeout);
         REQUIRE(counter == 2);
     }
 

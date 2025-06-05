@@ -16,6 +16,7 @@ struct DynamicWorkloadIntThread {
     std::function<void()> threadWorkload;
     std::mutex metaMutex;
     std::condition_variable metaInterrupt;
+    std::condition_variable mainSync;
 
     InterruptableThread t;
 
@@ -27,9 +28,11 @@ struct DynamicWorkloadIntThread {
         t(InterruptableThread {
             [this]() {
                 std::unique_lock l(metaMutex);
+                mainSync.notify_all();
                 metaInterrupt.wait(l);
 
                 this->threadWorkload();
+                mainSync.notify_all();
             },
             timeout
         }) {}
