@@ -40,7 +40,7 @@ function reindex() {
             202: () => {
                 showDialog("Reindex requested successfully.");
             },
-            422: () => {
+            409: () => {
                 showDialog("Reindex has already been requested, and is being processed.");
             }
         }

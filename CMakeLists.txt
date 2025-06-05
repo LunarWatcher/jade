@@ -42,7 +42,7 @@ find_package(cpr REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(libpqxx REQUIRED)
-find_package(nlohmann_json REQUIRED)
+find_package(reflectcpp REQUIRED)
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_definitions(-DJADE_DEBUG=1)

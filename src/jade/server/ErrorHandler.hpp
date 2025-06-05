@@ -1,10 +1,11 @@
 #pragma once
 
-#include "crow/middleware.h"
 #include "jade/util/Constants.hpp"
-#include "nlohmann/json.hpp"
+#include "jade/util/ResponseUtil.hpp"
 
 #include <jade/core/ContextProvider.hpp>
+#include <rfl.hpp>
+#include <rfl/json.hpp>
 
 namespace jade {
 
@@ -30,10 +31,10 @@ public:
                 } else if (res.code < 500) {
                     return;
                 }
+                // can't use `res = JSONResponse` here without invalidating the `code`, and any potential other headers.
+                // This avoids fucking with that
                 res.set_header("Content-Type", ContentType::json);
-                res.body = nlohmann::json {
-                    {"message", message},
-                }.dump();
+                res.body = rfl::json::write(MessageResponse{ message });
             } else {
                 if (message == "") {
                     message = "Error: HTTP " + std::to_string(res.code);

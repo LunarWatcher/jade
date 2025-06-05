@@ -1,49 +1,7 @@
 #include "BookRequests.hpp"
+
 #include <sstream>
-#include <string>
-
-void jade::from_json(const nlohmann::json& src, BookRequest& dest) {
-    src.at("title").get_to(dest.title);
-    if (src.contains("isbn")) {
-        auto& field = src.at("isbn");
-        if (field != nullptr) {
-            dest.isbn = field.get<std::string>();
-        }
-    }
-    if (src.contains("authors")) {
-        auto& field = src.at("authors");
-        if (field != nullptr) {
-            dest.authors = field;
-        }
-    }
-    if (src.contains("tags")) {
-        auto& field = src.at("tags");
-        if (field != nullptr) {
-            dest.tags = field;
-        }
-    }
-    if (src.contains("description")) {
-        auto& field = src.at("description");
-        if (field != nullptr) {
-            dest.description = field.get<std::string>();
-        }
-    }
-}
-
-void jade::from_json(const nlohmann::json& src, SearchRequest& dest) {
-    if (src.contains("literal") && !src.at("literal").is_null()) {
-        dest.literal = src.at("literal");
-    }
-    if (src.contains("title") && !src.at("title").is_null()) {
-        dest.title = src.at("title");
-    }
-    if (src.contains("tags") && !src.at("tags").is_null()) {
-        dest.tags = src.at("tags");
-    }
-    if (src.contains("authors") && !src.at("authors").is_null()) {
-        dest.authors = src.at("authors");
-    }
-}
+#include <string_view>
 
 namespace jade {
 

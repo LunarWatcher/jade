@@ -1,9 +1,16 @@
 #pragma once
 
 #include "crow/returnable.h"
-#include <nlohmann/json.hpp>
+#include "jade/util/Constants.hpp"
+
+#include <rfl/json.hpp>
+#include <rfl.hpp>
 
 namespace jade {
+
+struct MessageResponse {
+    std::string message;
+};
 
 /**
  * Utility class to convert JSON responses to string, and set the content type to JSON
@@ -12,22 +19,14 @@ class JSONResponse : public crow::returnable {
 private:
     std::string body;
 public:
-    JSONResponse(const std::string& body);
-    // Required to avoid conversion errors. Could require explicit `std::string` conversion outside, but it's easier to
-    // do it this way
-    JSONResponse(const char* c) : JSONResponse(std::string(c)) {}
-    JSONResponse(const nlohmann::json& body);
+    template <typename T>
+    JSONResponse(const T& obj) :
+        crow::returnable(ContentType::json),
+        body(rfl::json::write(obj)) {
+
+    }
 
     std::string dump() const override;
-};
-
-class JSONMessageResponse : public JSONResponse {
-public:
-    JSONMessageResponse(const std::string& message) : JSONResponse(
-        nlohmann::json {
-            {"message", message},
-        }
-    ) {}
 };
 
 }

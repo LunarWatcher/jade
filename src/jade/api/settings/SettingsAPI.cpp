@@ -22,13 +22,22 @@ void Settings::init(Server* server) {
 }
 
 void Settings::postCreateLibrary(Server *server, crow::request &req, crow::response &res) {
-    CreateLibRequest r = nlohmann::json::parse(req.body);
+    auto parseRes = rfl::json::read<CreateLibRequest, rfl::DefaultIfMissing>(req.body);
+    if (!parseRes) {
+        res = JSONResponse {
+            MessageResponse { parseRes.error().what() }
+        };
+        res.code = crow::BAD_REQUEST;
+        res.end();
+        return;
+    }
+    auto r = parseRes.value();
 
     if (r.location.empty() || !r.location.starts_with("/")) {
-        res = JSONMessageResponse(
+        res = JSONResponse(MessageResponse(
             "Malformed path. Note: if you supplied a relative path, these are not supported. "
             "Your path MUST be an absolute path."
-        );
+        ));
         res.code = crow::BAD_REQUEST;
         res.end();
         return;
@@ -36,32 +45,31 @@ void Settings::postCreateLibrary(Server *server, crow::request &req, crow::respo
 
     std::filesystem::path p(r.location);
     if (!std::filesystem::is_directory(p)) {
-        res = JSONMessageResponse("Path does not exist, or server user lacks read privileges.");
+        res = JSONResponse {MessageResponse { "Path does not exist, or server user lacks read privileges." }};
         res.code = crow::BAD_REQUEST;
         res.end();
         return;
     }
     if (!server->lib->createLibrary(server, p.string())) {
-        res = JSONMessageResponse("Library already exists");
+        res = JSONResponse {MessageResponse { "Library already exists" }};
         res.code = crow::BAD_REQUEST;
         res.end();
         return;
     }
 
-    res = JSONResponse(nlohmann::json{
-        {"message", "Success"},
-    });
+    res = JSONResponse(MessageResponse { "ok" });
     res.code = 201;
     res.end();
 }
 
-void Settings::postRefreshLibraries(Server *server, crow::request &req, crow::response &res) {
-
-
-    res = JSONResponse(nlohmann::json{
-        {"message", "Success"},
-    });
-    res.code = crow::ACCEPTED;
+void Settings::postRefreshLibraries(Server *server, crow::request&, crow::response &res) {
+    if (server->lib->requestRefresh()) {
+        res = JSONResponse(MessageResponse { "ok" });
+        res.code = crow::ACCEPTED;
+    } else {
+        res = JSONResponse(MessageResponse { "ok" });
+        res.code = crow::CONFLICT;
+    }
     res.end();
 }
 

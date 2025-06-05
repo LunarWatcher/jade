@@ -47,7 +47,16 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
     }
 
 
-    LoginRequest data = nlohmann::json::parse(req.body);
+    auto parseRes = rfl::json::read<LoginRequest, rfl::DefaultIfMissing>(req.body);
+    if (!parseRes) {
+        res = JSONResponse {
+            MessageResponse { parseRes.error().what() }
+        };
+        res.code = crow::BAD_REQUEST;
+        res.end();
+        return;
+    }
+    auto data = parseRes.value();
 
     server->pool->acquire<void>([&](auto& conn) {
         pqxx::work tx(conn);
@@ -59,11 +68,7 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
         );
 
         if (!row.has_value()) {
-            res = JSONResponse {
-                nlohmann::json {
-                    {"message", "User does not exist, or the password is incorrect"},
-                }
-            };
+            res = JSONResponse {MessageResponse {"User does not exist, or the password is incorrect"}};
             res.code = 401;
             tx.abort();
             return;
@@ -72,11 +77,8 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
         auto inputPassword = Hash::hash(data.password, std::get<3>(*row), std::get<4>(*row));
         if (inputPassword.hash != std::get<2>(*row)) {
             spdlog::info("{} provided a bad password", req.remote_ip_address);
-            res = JSONResponse {
-                nlohmann::json {
-                    {"message", "User does not exist, or the password is incorrect"},
-                }
-            };
+            // Same outward error message as teh user not existing, for security reasons
+            res = JSONResponse {MessageResponse {"User does not exist, or the password is incorrect"}};
             res.code = 401;
             return;
         }
@@ -91,7 +93,7 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
             std::get<5>(*row),
         };
         res = JSONResponse {
-            nlohmann::json {{"user", u},}
+            UserResponse { u }
         };
         userCtx.data->user = u;
 
@@ -105,18 +107,28 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
     auto& userCtx = (*server)->get_context<MSessionMiddleware>(req);
 
     if (userCtx.data && userCtx.data->user) {
-        res = JSONResponse{
-            R"({"message": "you already have an account, wtf are you doing?"})"
+        res = JSONResponse {
+            MessageResponse { "you already have an account, wtf are you doing?" }
         };
         res.code = crow::BAD_REQUEST;
         res.end();
         return;
     }
 
-    SignupRequest data = nlohmann::json::parse(req.body);
+    auto parseRes = rfl::json::read<SignupRequest, rfl::DefaultIfMissing>(req.body);
+    if (!parseRes) {
+        res = JSONResponse {
+            MessageResponse { parseRes.error().what() }
+        };
+        res.code = crow::BAD_REQUEST;
+        res.end();
+        return;
+    }
+
+    auto data = parseRes.value();
 
     if (data.username.empty() || data.password.empty()) {
-        res = JSONMessageResponse("Username or password missing");
+        res = JSONResponse(MessageResponse{"Username or password missing"});
         res.code = crow::BAD_REQUEST;
         res.end();
         return;
@@ -132,9 +144,7 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
         auto hasExistingUser = tx.query1<long long>("SELECT COUNT(*) FROM Users");
         if (std::get<0>(exists)) {
             res = JSONResponse {
-                nlohmann::json{
-                    {"message", "Username taken"},
-                }
+                MessageResponse { "Username already taken" }
             };
             res.code = 400;
             tx.abort();
@@ -156,9 +166,7 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
         tx.commit();
 
         res = JSONResponse {
-            nlohmann::json {
-                {"message", "ok"}
-            }
+            MessageResponse { "ok" }
         };
     });
 

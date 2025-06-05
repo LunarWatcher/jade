@@ -9,7 +9,6 @@
 #include "jade/web/WebProvider.hpp"
 
 #include <filesystem>
-#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
 namespace jade {

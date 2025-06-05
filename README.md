@@ -205,6 +205,7 @@ Note that none of these lists are in any form of prioritised order. They're orde
 ### Side projects for Later:tm:
 
 * [ ] Port sonic and/or sonic's rust client to C++ via Rust bindings. Could implement the client from scratch, but I'd rather not. Sonic itself looks embeddable.
+* [ ] Write a reflectcpp writer for either crow's mustache implementation, or that other template language I don't remember the name of and am half considering switching to
 
 [^1]: Calibre is used to deal with cover image generation due to its wide format support. The only other viable alternatives is to write it from scratch, or use a headless browser with the same renderer used for the website, to render it to png, which has 500M-1G worth of overhead. Optimally, writing it from scratch in a separate non-browser library would be beneficial (and reusable elsewhere while potentially being more performant), but this would be a massive undertaking that I do not feel like getting into unless there's other people who can provide additional resources with writing it. Until this exceedingly unlikely event happens, calibre is used to simplify the process.
 [^2]: In C++ in particular, it seems to be easier to find parsers than it is to find writers. Avoiding writes means significantly less implementation complexity.

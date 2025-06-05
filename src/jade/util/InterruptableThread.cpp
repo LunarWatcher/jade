@@ -20,11 +20,13 @@ void InterruptableThread::run() {
     while (running) {
         std::unique_lock l(m);
 
+        spdlog::debug("InterruptableThread: callback invoked");
         callback();
+        spdlog::debug("InterruptableThread: callback returned");
         
         control.wait_for(
             l,
-            std::chrono::minutes(60)
+            this->cycleTimeout
         );
     }
 }
@@ -38,6 +40,7 @@ bool InterruptableThread::interrupt() {
         return false;
     }
     control.notify_one();
+    spdlog::info("InterruptableThread: Manual refresh requested");
     std::this_thread::sleep_for(300ms);
     return true;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "jade/data/User.hpp"
 #include <crow.h>
 
 namespace jade {
@@ -7,6 +8,10 @@ namespace jade {
 class Server;
 
 namespace AuthAPI {
+
+struct UserResponse {
+    User user;
+};
 
 extern void init(Server* server);
 

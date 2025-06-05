@@ -76,12 +76,21 @@ void BookAPI::postEditBook(Server* server, crow::request& req, crow::response& r
     auto book = server->lib->getBook(bookID);
 
     if (!book.has_value()) {
-        res = JSONMessageResponse("Invalid book");
+        res = JSONResponse {MessageResponse { "Invalid book" }};
         res.code = 404;
         res.end();
         return;
     }
-    BookRequest data = nlohmann::json::parse(req.body);
+    auto parseRes = rfl::json::read<BookRequest, rfl::DefaultIfMissing>(req.body);
+    if (!parseRes) {
+        res = JSONResponse {
+            MessageResponse { parseRes.error().what() }
+        };
+        res.code = crow::BAD_REQUEST;
+        res.end();
+        return;
+    }
+    auto data = parseRes.value();
     spdlog::debug("Edit: parsed {}", req.body);
 
     server->pool->acquire<void>([&](pqxx::connection& conn) {
@@ -145,7 +154,7 @@ void BookAPI::postEditBook(Server* server, crow::request& req, crow::response& r
         w.commit();
         spdlog::debug("Changes committed");
     });
-    res = JSONMessageResponse("ok");
+    res = JSONResponse {MessageResponse { "ok" }};
     res.code = 200;
     res.end();
 }

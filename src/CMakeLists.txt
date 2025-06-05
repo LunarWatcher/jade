@@ -11,11 +11,7 @@ add_library(jadesrc STATIC
     jade/core/ContextProvider.cpp
     jade/core/Server.cpp
 
-    
-    jade/data/AuthRequest.cpp
     jade/data/BookRequests.cpp
-    jade/data/SettingsRequests.cpp
-    jade/data/User.cpp
     jade/data/db/Book.cpp
 
     jade/db/ConnectionPool.cpp
@@ -43,7 +39,7 @@ PUBLIC
     stc
     cpr::cpr
     spdlog::spdlog
-    nlohmann_json::nlohmann_json
+    reflectcpp::reflectcpp
     Crow::Crow
     OpenSSL::Crypto
     CLI11::CLI11

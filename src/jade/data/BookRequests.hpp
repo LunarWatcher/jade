@@ -1,6 +1,8 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
+#include <optional>
 
 namespace jade {
 
@@ -20,8 +22,5 @@ struct SearchRequest {
 
     static SearchRequest parse(const std::string_view& raw);
 };
-
-void from_json(const nlohmann::json& src, BookRequest& dest);
-void from_json(const nlohmann::json& src, SearchRequest& dest);
 
 }

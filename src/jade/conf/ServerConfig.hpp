@@ -2,9 +2,11 @@
 
 #include <filesystem>
 #include <fstream>
+#include <rfl/DefaultIfMissing.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <nlohmann/json.hpp>
+#include <rfl.hpp>
+#include <rfl/json.hpp>
 
 namespace jade {
 
@@ -50,26 +52,6 @@ struct ServerConfig {
 
 };
 
-inline void from_json(const nlohmann::json& i, ServerConfig& o) {
-    i.at("dbPassword").get_to(o.dbPassword);
-
-    if (i.contains("port")) {
-        i.at("port").get_to(o.port);
-    }
-    if (i.contains("dbHost")) {
-        i.at("dbHost").get_to(o.dbHost);
-    }
-    if (i.contains("dbName")) {
-        i.at("dbName").get_to(o.dbName);
-    }
-    if (i.contains("dbUsername")) {
-        i.at("dbUsername").get_to(o.dbUsername);
-    }
-    if (i.contains("thumbnailCacheDir")) {
-        i.at("thumbnailCacheDir").get_to(o.thumbnailCacheDir);
-    }
-}
-
 static void loadConfig(ServerConfig& cfg, const std::filesystem::path& confDir) {
     std::ifstream f(confDir / "config.json");
 
@@ -77,9 +59,13 @@ static void loadConfig(ServerConfig& cfg, const std::filesystem::path& confDir) 
         throw std::runtime_error("Failed to load " + confDir.string() + "/config.json");
     }
 
-    nlohmann::json j;
-    f >> j;
-    j.get_to(cfg);
+    auto res = rfl::json::read<ServerConfig, rfl::DefaultIfMissing>(f);
+    if (!res) {
+        spdlog::error("Failed to load config file: {}", res.error().what());
+        throw std::runtime_error("Invalid config");
+    }
+
+    cfg = res.value();
     spdlog::debug("Loaded config from {}/config.json", confDir.string());
 }
 

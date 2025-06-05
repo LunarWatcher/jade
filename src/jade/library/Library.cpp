@@ -41,50 +41,47 @@ Library::Library(Server* s, pqxx::connection& conn) : serv(s) {
 }
 
 void Library::scan() {
-    volatile ThreadCanary canary(this); // NOLINT
-    while (true) {
-        spdlog::debug("Index starting");
-        for (auto& [id, source] : sources) {
-            auto& dir = source.dir;
-            if (!std::filesystem::exists(dir)) {
-                spdlog::error("Index failure: {} does not exist (bad mount?)", dir.string());
-                continue;
-            }
-            // Under ext4, adding or updating a file results in last_write_time being updated.
-            if (auto newUpdate = std::filesystem::last_write_time(dir);
-                newUpdate > source.lastUpdate)
-            {
-                source.lastUpdate = newUpdate;
 
-                reindexLibrary(id, dir);
-            } else {
-                spdlog::debug("{} is up to date", source.dir.string());
-            }
+    spdlog::debug("Index starting");
+    for (auto& [id, source] : sources) {
+        auto& dir = source.dir;
+        if (!std::filesystem::exists(dir)) {
+            spdlog::error("Index failure: {} does not exist (bad mount?)", dir.string());
+            continue;
         }
+        // Under ext4, adding or updating a file results in last_write_time being updated.
+        if (auto newUpdate = std::filesystem::last_write_time(dir);
+            newUpdate > source.lastUpdate)
+        {
+            source.lastUpdate = newUpdate;
 
-        bookCount = 0;
-        serv->pool->acquire<void>([this](auto& conn) {
-            pqxx::work w(conn);
-
-            for (auto& [id, source] : sources) {
-                auto res = w.query1<int64_t>(
-                    "SELECT COUNT(*) FROM Jade.Books WHERE LibraryID = $1",
-                    pqxx::params {
-                        id
-                    }
-                );
-                source.bookCount = std::get<0>(res);
-                bookCount += source.bookCount;
-            }
-            w.abort();
-        });
-
-        if (sources.empty()) {
-            spdlog::info("Scanner: No libraries exist to scan");
+            reindexLibrary(id, dir);
         } else {
-            spdlog::debug("Index complete");
+            spdlog::debug("{} is up to date", source.dir.string());
         }
-        std::this_thread::sleep_for(std::chrono::minutes(60));
+    }
+
+    bookCount = 0;
+    serv->pool->acquire<void>([this](auto& conn) {
+        pqxx::work w(conn);
+
+        for (auto& [id, source] : sources) {
+            auto res = w.query1<int64_t>(
+                "SELECT COUNT(*) FROM Jade.Books WHERE LibraryID = $1",
+                pqxx::params {
+                    id
+                }
+            );
+            source.bookCount = std::get<0>(res);
+            bookCount += source.bookCount;
+        }
+        w.abort();
+    });
+
+    if (sources.empty()) {
+        spdlog::info("Scanner: No libraries exist to scan");
+    } else {
+        spdlog::debug("Index complete");
     }
 }
 
@@ -491,7 +488,8 @@ std::optional<BookType> Library::validateExtension(const std::filesystem::path& 
 }
 
 bool Library::requestRefresh() {
-    return true;
+    if (!runner) { return false; }
+    return runner->interrupt();
 }
 
 bool Library::isBookPageNumberValid(size_t page, size_t pagesize, std::optional<int64_t> libraryId) {

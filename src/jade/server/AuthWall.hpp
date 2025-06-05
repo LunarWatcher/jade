@@ -18,7 +18,7 @@ struct RequireAuthedUserMiddleware : public crow::ILocalMiddleware {
         if (!user.data || !user.data->user) {
             // Not authenticated
             if constexpr (IsAPI) {
-                res = JSONMessageResponse("This endpoint requires authentication.");
+                res = JSONResponse {MessageResponse { "This endpoint requires authentication." }};
                 res.code = crow::FORBIDDEN;
             } else {
                 // TODO: make sure `redirect` properly urlencodes
@@ -29,7 +29,7 @@ struct RequireAuthedUserMiddleware : public crow::ILocalMiddleware {
         } else if constexpr (NeedsAdmin) {
             if (!user.data->user->isAdmin) {
                 // Authed, but not an admin
-                res = JSONMessageResponse("You lack the permission required to see this.");
+                res = JSONResponse {MessageResponse { "You lack the permission required to see this." }};
                 res.code = crow::FORBIDDEN;
                 res.end();
             }
