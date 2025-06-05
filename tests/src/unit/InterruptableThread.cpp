@@ -69,15 +69,24 @@ TEST_CASE("Validate long interrupts") {
     }
 
     REQUIRE(t->interrupt());
-    REQUIRE(counter == 1);
+    {
+        std::unique_lock l(counterMutex);
+        REQUIRE(counter == 1);
+    }
     INFO("Note: expecting next REQUIRE_FALSE to be for the repeat check");
     REQUIRE_FALSE(t->interrupt());
-    REQUIRE(counter == 1);
+    {
+        std::unique_lock l(counterMutex);
+        REQUIRE(counter == 1);
+    }
 
     // The test interrupt needs to be manually ntoified here, so the inner thread can release in .kill()
     t.doMetaInterrupt();
     std::this_thread::sleep_for(300ms);
-    REQUIRE(counter == 2);
+    {
+        std::unique_lock l(counterMutex);
+        REQUIRE(counter == 2);
+    }
 
     // Killing the thread should not affect the counter at this point, since the timeout won't have elapsed, and no
     // further interrupts have been requested
