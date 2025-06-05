@@ -32,17 +32,23 @@ else
 fi
 
 sudo mkdir jade
-sudo chown -R $JADE_USER /opt/jade
-sudo -u $JADE_USER git clone https://codeberg.org/LunarWatcher/jade
+sudo chown -R $USER /opt/jade
+git clone https://codeberg.org/LunarWatcher/jade
 cd /opt/jade
+python3 -m venv env
+source ./env/bin/activate
+pip3 install conan
 
-# TODO: I think this might count as insecure. Keeping /opt/jade and /opt/jade/dist/bin owned by $USER or root (root probably just for the bin folder), and
-# making the data dir itself owned by $JADE_USER might be safer?
-sudo -u $JADE_USER mkdir build
+# Configure /opt/jade/dist permissions
+mkdir /opt/jade/dist
+# I don't think -R is necessary, but whatever
+sudo chown -R $JADE_USER /opt/jade/dist
+
+mkdir build
 cd build
-sudo -u $JADE_USER cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/jade/dist/ 
-sudo -u $JADE_USER make -j $(nproc)
-sudo -u $JADE_USER make install
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/jade/dist/ 
+make -j $(nproc)
+sudo cmake --install . --prefix /opt/jade/dist
 
 # Database init {{{
 # For non-interactive use, check for the PSQL_PASSWORD env variable before prompting

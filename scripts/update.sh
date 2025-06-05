@@ -2,7 +2,9 @@ echo "Using username ${JADE_USER:=jade}"
 
 cd /opt/jade
 
-sudo -u $JADE_USER git pull
+# TODO: stick to tagged versions unless flags say otherwise
+git pull
 cd build 
-sudo -u $JADE_USER make -j $(nproc) install
+make -j $(nproc)
+sudo cmake --install . --prefix /opt/jade/dist
 sudo systemctl restart jade
