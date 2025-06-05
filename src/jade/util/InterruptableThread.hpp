@@ -34,7 +34,9 @@ public:
         if (!running) {
             return;
         }
+        std::unique_lock l(m);
         running = false; 
+        l.unlock();
         control.notify_all();
         t.join(); 
     }

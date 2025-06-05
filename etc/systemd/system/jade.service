@@ -8,7 +8,8 @@ Restart=on-failure
 RestartSec=60s
 Type=idle
 WorkingDirectory=/opt/jade/dist
-ExecStart=/opt/jade/dist/bin/jade
+Environment="SPDLOG_LEVEL=info"
+ExecStart=/opt/jade/dist/bin/jade run
 User=jade
 
 [Install]

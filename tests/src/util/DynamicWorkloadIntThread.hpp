@@ -1,0 +1,58 @@
+#pragma once
+
+#include "jade/util/InterruptableThread.hpp"
+#include <chrono>
+#include <condition_variable>
+#include <spdlog/spdlog.h>
+
+namespace jade::tests {
+using namespace std::literals;
+
+/**
+ * Utility class wrapping InterruptableThread, and a mutex and an interrupt that can be used to dynamically control how
+ * long it takes to execute. Largely a utility to avoid unnecessary sleeps.
+ */
+struct DynamicWorkloadIntThread {
+    std::function<void()> threadWorkload;
+    std::mutex metaMutex;
+    std::condition_variable metaInterrupt;
+
+    InterruptableThread t;
+
+    DynamicWorkloadIntThread(
+        std::function<void()> threadWorkload,
+        std::chrono::minutes timeout = 60min
+    ) 
+        : threadWorkload(threadWorkload), // NOLINT
+        t(InterruptableThread {
+            [this]() {
+                std::unique_lock l(metaMutex);
+                metaInterrupt.wait(l);
+
+                this->threadWorkload();
+            },
+            timeout
+        }) {}
+
+    ~DynamicWorkloadIntThread() {
+        spdlog::debug("Destroying DynamicWorkloadIntThread");
+        kill();
+    }
+
+    void doMetaInterrupt() {
+        metaInterrupt.notify_all();
+    }
+
+    void kill() {
+        metaInterrupt.notify_all();
+        std::this_thread::sleep_for(900ms);
+        t.kill();
+    }
+
+    InterruptableThread* operator->() {
+        return &t;
+    }
+
+};
+
+}
