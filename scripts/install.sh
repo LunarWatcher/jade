@@ -25,7 +25,7 @@ else
     echo "If it isn't, you have 10 seconds to press ctrl-c to abort the installation."
     echo "Using an existing user is fine, but may have security implications in the event of"
     echo "a security breach. It's strongly recommended to use a dedicated user for the server"
-    echo "NOTE: If you're rerunning the install script to update hazel, and the existing user _is_ for this server, don't."
+    echo "NOTE: If you're rerunning the install script to update jade, and the existing user _is_ for this server, don't."
     echo "Use /opt/jade/scripts/update.sh instead."
     set -x
     sleep 10
