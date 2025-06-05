@@ -48,7 +48,6 @@ struct DynamicWorkloadIntThread {
 
     void kill() {
         metaInterrupt.notify_all();
-        std::this_thread::sleep_for(900ms);
         t.kill();
     }
 

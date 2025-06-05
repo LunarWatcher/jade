@@ -41,7 +41,6 @@ bool InterruptableThread::interrupt() {
     }
     control.notify_all();
     spdlog::info("InterruptableThread: Manual refresh requested");
-    std::this_thread::sleep_for(300ms);
     return true;
 }
 
