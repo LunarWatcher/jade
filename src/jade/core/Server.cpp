@@ -23,7 +23,6 @@ Server::Server(const std::filesystem::path& confDir, Flags runtimeConfig) : app(
         cfg.getConnString()
     );
 
-
     bootstrap();
     dbMigrations();
 

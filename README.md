@@ -23,13 +23,10 @@ I need a reader with both web- and filesystem-based uploads with metadata change
 
 **Note that this will not work well with existing ebook libraries**. Importing from other ebook systems is not a priority, which means existing metadata will be discarded. I currently only have somewhere around 30 ebooks stored, with most of the metadata irrepairably butchered by Kavita, to the point where starting over is significantly easier and orders of magnitude faster than trying to implement an importer. However, importing is on the list of features that can be implemented if there is interest for whatever reason. Going by the average interest in my projects, there won't be in the foreseeable future, so it isn't something I'm implementing early. Equivalently, exporting metadata back out is not a priority. If you're interested in this functionality, you can add it yourself and open a pull request.
 
-
-
 ## Requirements
 * C++20 compiler and general compilation packages for your distro
 * Linux
-* OpenSSL
-* libpq, zlib (Debian: `libpq-dev zlib1g`)
+* Python 3.x and `venv` if using the installer. The basic requirement otherwise is Python 3 with Conan installed. 
 * PostgreSQL (not necessarily on the same server)
 * CMake 3.28 or newer
 * calibre[^1], installed via your system package manager (See: https://github.com/kovidgoyal/calibre?tab=readme-ov-file#calibre-package-versions-in-various-repositories)
@@ -53,7 +50,7 @@ Supported variables for this script:
 * `JADE_DOMAIN`: Required, sets `server_name` in nginx to `ebooks.${JADE_DOMAIN}`[^3]
 * `JADE_CERT`/`JADE_CERT_KEY`: Sets nginx's `ssl_certificate` and `ssl_certificate_key` respectively[^3].
 * `PSQL_PASSWORD`: Optional, used to set the password in postgres. If not provided, you'll be prompted for a password
-* `JADE_USER`: Optional, defaults to `jade`
+* `JADE_USER`: Optional, defaults to `jade`. A new user is always created, this variable only determines the name for the user.
 
 
 ### Post-install steps
@@ -82,96 +79,12 @@ No, and Docker won't be supported either. You're welcome to make your own Docker
 
 ## Updating Jade
 
-Run `/opt/jade/scripts/update.sh`. The script takes care of the rest. If you used a non-standard `JADE_USER` During installation, you need to set the `JADE_USER` environment variable with the correct username.
+Run `/opt/jade/scripts/update.sh`. The script takes care of the rest.
 
 ## Development setup
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
-TODO
-
-### Running tests
-
-There are two kinds of tests; frontend and backend tests. They're all run via CMake, with one of the following three targets:
-
-* `test`: Runs backend tests
-* `test-frontend`: Runs frontend and integration tests
-* `test-all`: Runs both frontend and backend tests
-
-> [!WARNING]
->
-> Both test types have some special requirements. Failure to read this section in its entirety before running the tests **will** result in test failures.
-
-#### Common requirements
-
-One of the common requirements is access to a Postgres instance with a special database (`jadetest`). By default, the same user is used for both prod and tests. If you're comfortable creating these tables yourself, you're likely already setting up the database and a user. If you're not (or you're like me and can't be bothered writing out), you can run the following two scripts:
-```
-./scripts/dev/dbinit.sh
-./scripts/dev/setup-testdb.sh
-```
-
-Note that the first script will not just create the user, but also create the `jade` database for running local debug instances. For the first script, you can also supply a `PSQL_PASSWORD` environment variable if you don't want to be interactively prompted for a password.
-
-While the `PSQL_PASSWORD` variable is optional for the `dbinit` script, it is _required_ for both the frontend and backend tests. However, unlike for the `dbinit.sh` script, there's a conveniently provided `.env` file.
-
-With the project folder as the working directory:
-```
-cp .env.template .env
-```
-
-Edit it, and populate the variables. Currently, only `PSQL_PASSWORD` is supported. Note that the tests assume the database is available at `localhost:5432`, and do not currently support configuring it to point elsewhere.
-
-> [!WARNING]
->
-> The `test-all` target has been specially defined to only run one test at a time. DO NOT run the frontend and backend tests concurrently. Part of the test setup includes several database wipes, which will result in frontend and backend tests colliding and erroneously failing.
-
-
-#### Running backend tests
-
-The backend tests have some of the fewest requirements. If you can build and run Jade, you can build and run the tests. There are no special requirements beyond the common requirements described in the previous section. You can just run
-```
-make test
-```
-(Or `make test-all`, but see "Running frontend tests" first)
-
-and let it do its thing.
-
-#### Running frontend tests
-
-To run the frontend tests, you need:
-* Python 3
-* A working display of some kind. This does **not** need to be a real display if you're in a headless environment. Use [xvfb](https://wiki.archlinux.org/title/Xinit#Running_in_a_virtual_server) if you're on Xorg, and switch to xorg if you're on wayland[^6]. Xvfb is also useful regardless, as it lets you do anything else while the tests run. The frontend tests do take quite a bit longer to run than the backend tests due to browser and navigation overhead.
-* Firefox and geckodriver; however, you need Linux to run any of this, so odds are good you have it already. Geckodriver comes presinstalled with firefox in most (?) cases, so on most consumer distros, you probably don't need to worry about this requirement.
-
-Using `build/` as your working directory:
-```bash
-# Optional: create a venv
-$ python3 -m venv env
-$ source env/bin/activate
-# Required:
-# Note that users of ubuntu or derivatives need to pass --break-system-packages without a venv.
-# Also note that doing so can break  your system packages, so be aware of the risks before you do this.
-$ pip3 install -r ../tests/requirements.txt
-$ make test-frontend
-# Or, alternatively, to also run backend tests (please see "Running backend tests" first):
-$ make test-all
-```
-
-**Note:** Several of the frontend tests require the `jade` executable. It's automatically built when you run `test-frontend` in CMake, and its location is automatically provided when the tests are run. 
-
->[!WARNING]
-> 
-> If you're using the Firefox snap (my sincerest condolences), Selenium will not cooperate. You will likely need to explicitly define the following environment variable:
-> ```bash
-> export SE_GECKODRIVER=/snap/bin/geckodriver
-> ```
-> 
-> Otherwise, a number of different Selenium-related bugs will occur, that will cause the tests to erroneously fail. Some failure modes include:
-> 
-> * Timeouts during the test, specifically when creating the browser
-> * Various errors ("binary is not a firefox executable", "the geckodriver detected in PATH may not be compatbile with the detected firefox version")
->   * The incompatible versions may appear regardless, because Ubuntu's snap is horseshit, out of date, and contain unsynced  geckodriver and firefox
-> * Outright failure to find Firefox and/or Geckodriver
-
-## Planned  features
+## Planned features
 
 Note that none of these lists are in any form of prioritised order. They're ordered by when they were added, not necessarily by when they're planned.
 
@@ -180,7 +93,7 @@ Note that none of these lists are in any form of prioritised order. They're orde
 | Done | Description | Blocked? |
 | ---- | ----------- | -------- |
 | [ ] | Configurable FixedLayout columns | [Yes](https://github.com/johnfactotum/foliate-js/issues/66) |
-| [ ] | Fully scrollable files | [Yes](https://github.com/johnfactotum/foliate-js/issues/66) |
+| [ ] | Fully scrollable files | [Yes](https://github.com/johnfactotum/foliate-js/issues/54) |
 | [ ] | Inline zoom | |
 | [ ] | Search | | 
 | [ ] | Progress tracking or something | |
@@ -204,7 +117,6 @@ Note that none of these lists are in any form of prioritised order. They're orde
 
 ### Side projects for Later:tm:
 
-* [ ] Port sonic and/or sonic's rust client to C++ via Rust bindings. Could implement the client from scratch, but I'd rather not. Sonic itself looks embeddable.
 * [ ] Write a reflectcpp writer for either crow's mustache implementation, or that other template language I don't remember the name of and am half considering switching to
 
 [^1]: Calibre is used to deal with cover image generation due to its wide format support. The only other viable alternatives is to write it from scratch, or use a headless browser with the same renderer used for the website, to render it to png, which has 500M-1G worth of overhead. Optimally, writing it from scratch in a separate non-browser library would be beneficial (and reusable elsewhere while potentially being more performant), but this would be a massive undertaking that I do not feel like getting into unless there's other people who can provide additional resources with writing it. Until this exceedingly unlikely event happens, calibre is used to simplify the process.

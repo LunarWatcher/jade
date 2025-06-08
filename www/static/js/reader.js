@@ -275,12 +275,6 @@ class Reader {
         } else if (k == "Escape" || k == "e") {
             this.closeSidebar();
             this.setFocus(null);
-        } else if (k == "i") {
-
-            this.view?.renderer.setAttribute(
-                "zoom", 
-                (parseFloat(this.view?.renderer.getAttribute("zoom") || 1) + 0.1).toString()
-            )
         }
     }
     #onLoad({ detail: { doc } }) {
@@ -335,4 +329,10 @@ const open = async file => {
     await reader.open(file)
 }
 
-export {open};
+let bookID = document.getElementById("reader-root")
+    .getAttribute("data-bookid");
+open(`/api/books/${bookID}/download`)
+    .catch(e => {
+        showDialog("Failed to load the book. Download it from the details page and read it in a different reader, or try again later");
+        console.error(e)
+    });

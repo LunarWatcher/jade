@@ -86,7 +86,7 @@ add_custom_target(test-frontend
     COMMENT "Test jade (frontend + integration)"
 )
 add_custom_target(test-all
-    COMMAND test
+    COMMAND tests
     DEPENDS tests test-frontend
     COMMENT "Run backend and frontend tests")
 # vim:ft=cmake

@@ -1,0 +1,1 @@
+registerOnSubmit("signup-form", signup);

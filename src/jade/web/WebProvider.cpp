@@ -96,7 +96,8 @@ void WebProvider::getLogin(Server* server, crow::request& req, crow::response& r
         .pageDescription = "Log in to Jade",
         .pageFile = "auth/login.mustache",
         .pageScripts = {
-            "/static/js/auth.js"
+            "/static/js/auth.js",
+            "/static/js/pages/login.js",
         },
     };
     auto page = ContextProvider::getBaseTemplate();
@@ -118,7 +119,8 @@ void WebProvider::getSignup(Server* server, crow::request& req, crow::response& 
         .pageDescription = "Sign up to Jade",
         .pageFile = "auth/signup.mustache",
         .pageScripts = {
-            "/static/js/auth.js"
+            "/static/js/auth.js",
+            "/static/js/pages/signup.js",
         }
     };
     auto page = ContextProvider::getBaseTemplate();
@@ -173,6 +175,12 @@ void WebProvider::getBooks(Server* server, crow::request& req, crow::response& r
         .pageTitle = "Library | Jade",
         .pageDescription = "Ebook library",
         .pageFile = "listings/books.mustache",
+        .pageScripts = {
+            "/static/js/pages/library.js",
+            "/static/js/components/paginator.js",
+            "/static/js/components/filter.js"
+
+        },
         .includeSidebar = true,
     };
 
@@ -260,8 +268,17 @@ void WebProvider::getBookDetails(Server* server, crow::request& req, crow::respo
         .pageTitle = book->title + " | Jade",
         .pageDescription = "Ebook library",
         .pageFile = "listings/book.mustache",
+        .pageScripts = {
+            "/static/js/pages/book.js"
+        },
         .includeSidebar = true,
     };
+
+    if (userCtx.data->user->isAdmin) {
+        pageCtx.pageScripts.push_back(
+            "/static/js/pages/book-admin.js"
+        );
+    }
 
     auto page = ContextProvider::getBaseTemplate();
     auto ctx = ContextProvider::buildBaseContext(
@@ -293,6 +310,9 @@ void WebProvider::getBookReader(Server* server, crow::request& req, crow::respon
         .pageTitle = book->title + " | Jade Reader View",
         .pageDescription = "Ebook library",
         .pageFile = "reader.mustache",
+        .pageModules = {
+            "/static/js/reader.js"
+        },
         .pageCSS = {"/static/css/foliate.css"},
         .hideFooter = true
     };

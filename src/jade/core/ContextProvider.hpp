@@ -28,6 +28,7 @@ struct PageContext {
     std::string pageDescription;
     std::string pageFile;
     std::vector<crow::json::wvalue> pageScripts = {};
+    std::vector<crow::json::wvalue> pageModules = {};
     std::vector<crow::json::wvalue> pageCSS = {};
 
     bool includeSidebar = false;
@@ -52,6 +53,7 @@ struct PageContext {
                 {"Title", pageTitle},
                 {"Description", pageDescription},
                 {"Scripts", pageScripts},
+                {"Modules", pageModules},
                 {"CSS", pageCSS}
             };
             generated["Content"] = [&](std::string&) { \

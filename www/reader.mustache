@@ -1,4 +1,4 @@
-<div class="flex-vertical overlay-container" id="reader-root">
+<div class="flex-vertical overlay-container" id="reader-root" data-bookid="{{Book.ID}}">
     <div id="reader-overlay" class="overlayer"></div> 
     <div id="sidebar-header" class="toolbar flex-horizontal">
         <button id="sidebar-button" aria-label="Show sidebar" class="settings-button">↦</button>
@@ -60,11 +60,3 @@
         </button>
     </div>
 </div>
-<script type="module" defer>
-import {open} from "/static/js/reader.js";
-open("/api/books/{{Book.ID}}/download")
-    .catch(e => {
-        showDialog("Failed to load the book. Download it from the details page and read it in a different reader, or try again later");
-        console.error(e)
-    });
-</script>

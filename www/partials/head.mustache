@@ -14,4 +14,7 @@
     {{#Page.Scripts}}
         <script src="{{.}}" charset="utf-8" defer></script>
     {{/Page.Scripts}}
+    {{#Page.Modules}}
+        <script src="{{.}}" type="module" charset="utf-8" defer></script>
+    {{/Page.Modules}}
 </head>

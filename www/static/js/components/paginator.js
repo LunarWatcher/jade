@@ -129,6 +129,7 @@ function navToPage(/** @type {Number | null} */ page, /** @type {Number | null}*
 }
 
 function skipToPage(ev) {
+    ev.preventDefault();
     navToPage(
         ev.target.elements["page"].value
     )
@@ -137,3 +138,15 @@ function skipToPage(ev) {
 loadPaginator();
 
 document.getElementById("skip-to-page").reset();
+
+registerOnSubmit("skip-to-page", skipToPage)
+document.getElementById("prev-page")
+    ?.addEventListener("click", ev => {
+        ev.preventDefault();
+        navToPage(null, -1)
+    });
+document.getElementById("next-page")
+    ?.addEventListener("click", ev => {
+        ev.preventDefault();
+        navToPage(null, 1)
+    });

@@ -96,3 +96,4 @@ function signup(ev) {
 
 // Properly handle weird backwards shit
 setEnabled(true);
+

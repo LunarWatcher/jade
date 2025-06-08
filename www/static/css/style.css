@@ -492,3 +492,13 @@ button.danger:hover {
 #paginator a.active:hover:any-link {
     background-color: var(--background-secondary-active);
 }
+
+#edit-dialog img {
+    width: 10%;
+    min-width: 100px;
+    align-self: flex-start;
+}
+#edit-dialog textarea {
+    resize: vertical;
+    min-height: 5rem;
+}

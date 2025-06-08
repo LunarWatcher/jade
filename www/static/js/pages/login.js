@@ -1,0 +1,1 @@
+registerOnSubmit("login-form", login);

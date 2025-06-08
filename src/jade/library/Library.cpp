@@ -221,9 +221,7 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
 
         }
 
-        // TODO: prepared statements don't seem to work with the stream API. Need to report this as a bug at some point,
-        // but until then, this is an extremely rare exception where I'll do hard-coded values. It's just an int, so no
-        // injection risk.
+        std::vector<int64_t> toRemove;
         for (auto [bookId, filename] : w.stream<int64_t, std::string_view>(
             "SELECT BookID, FileName FROM Jade.Books WHERE LibraryID = " + std::to_string(sourceId)
             //pqxx::params {
@@ -235,12 +233,15 @@ void Library::reindexLibrary(int64_t sourceId, const std::filesystem::path& dir)
                 if (std::filesystem::exists(thumbnail)) {
                     std::filesystem::remove(thumbnail);
                 }
-
-                w.exec("DELETE FROM Jade.Books WHERE BookID = $1", pqxx::params {
-                    bookId
-                });
-                spdlog::info("Book {} no longer exists and has been removed", bookId);
+                toRemove.push_back(bookId);
             }
+        }
+
+        for (const auto& bookId : toRemove) {
+            w.exec("DELETE FROM Jade.Books WHERE BookID = $1", pqxx::params {
+                bookId
+            });
+            spdlog::info("Book {} no longer exists and has been removed", bookId);
         }
 
         w.commit();

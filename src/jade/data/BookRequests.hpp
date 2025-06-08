@@ -8,8 +8,8 @@ namespace jade {
 
 struct BookRequest {
     std::string title;
-    std::string isbn;
-    std::string description;
+    std::optional<std::string> isbn;
+    std::optional<std::string> description;
     std::vector<std::string> authors;
     std::vector<std::string> tags;
 };

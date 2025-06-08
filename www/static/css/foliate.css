@@ -16,6 +16,12 @@
 }
 
 foliate-view {
+    /*
+     The display hack here is to allow scrolalble overflow when zooming, without crowing the size of the editor.
+     This is apparently a bug rather than an implementation bug on my end:
+        https://github.com/johnfactotum/foliate-js/issues/67#issue-3071827981
+        
+     */
     display: inline;
     height: 100%;
 }

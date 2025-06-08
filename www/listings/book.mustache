@@ -3,18 +3,18 @@
 {{#User.IsAdmin}}
     <dialog id="edit-dialog">
         <h2>Edit book</h2>
-        <div class="flex-horizontal" style="gap: 8px">
-            <img src="/api/books/{{Book.ID}}/cover" style="width: 10%; min-width: 100px; align-self: flex-start;" class="flex-shrink" />
-            <form onsubmit="editBook(event)" class="flex-vertical flex-grow" id="edit-book"
-            >
+        <div class="flex-horizontal">
+            <img src="/api/books/{{Book.ID}}/cover" class="flex-shrink" />
+            <form class="flex-vertical flex-grow" id="edit-book">
                 <label for="title">Title</label>
                 <input name="title" type="text" value="{{Book.Title}}" />
+
 
                 <label for="isbn">ISBN</label>
                 <input name="isbn" type="text" value="{{#Book.ISBN}}{{.}}{{/Book.ISBN}}" />
 
                 <label for="description">Description</label>
-                <textarea name="description" style="resize: vertical; min-height: 5rem">{{#Book.Description}}{{.}}{{/Book.Description}}</textarea>
+                <textarea name="description">{{#Book.Description}}{{.}}{{/Book.Description}}</textarea>
 
                 <label for="authors">Authors</label>
                 <input type="text" value="{{#Book.SAuthors}}{{.}}{{/Book.SAuthors}}" name="authors" />
@@ -24,66 +24,20 @@
 
                 <div class="flex-horizontal grow">
                     <input type="submit" value="Update" class="flex-grow" />
-                    <button type="button" onclick="closeModal('edit-dialog')" class="flex-grow danger">Cancel</button>
+                    <button id="close-edit-modal-btn" type="button" class="flex-grow danger">Cancel</button>
                 </div>
+
+                <input type="hidden" name="bookid" value="{{Book.ID}}" />
             </form>
         </div>
     </dialog>
 
-    <script>
-    function editBook(event) {
-        event.preventDefault();
-
-        let form = event.target;
-        let title = form["title"].value;
-        let isbn = form["isbn"].value.trim();
-        let description = form["description"].value.trim();
-        let authors = form["authors"]
-            .value
-            .split("&")
-            .map(it => it.trim())
-            .filter(it => it != "");
-        let tags = form["tags"]
-            .value
-            .split(" ")
-            .filter(it => it != "");
-
-        fetch("/api/books/{{Book.ID}}/edit", {
-            method: "POST",
-            body: JSON.stringify({
-                title: title,
-                description: description || null,
-                isbn: isbn || null,
-                authors: authors,
-                tags: tags,
-            }),
-            credentials: "include"
-        })
-            .then(res => {
-                if (res.status == 404) {
-                    showDialog("Failed to find book. Has the book been deleted since you opened the page?");
-                } else if (res.status != 200) {
-                    showDialog("Failed to update book");
-                } else if (res.status == 200) {
-                    res.json().then(() => {
-                        location.reload();
-                    });
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                showDialog("Failed to connect to the server");
-            });
-        return false;
-    }
-
-    </script>
 {{/User.IsAdmin}}
 
 <div class="book-details p-nopad">
     <div class="header style-secondary flex-horizontal-rev">
         {{#User.IsAdmin}}
-        <a class="p8" href="#" onclick="initModal('edit-dialog', true)" aria-label="Edit book metadata">
+        <a id="edit-book-btn" class="p8" href="#" aria-label="Edit book metadata">
             ✏️
         </a>
         {{/User.IsAdmin}}
@@ -116,11 +70,3 @@
 
 </div>
 
-<script>
-for (let elem of document.getElementsByClassName("tag")) {
-    let tagName = elem.getAttribute("data-rawtag");
-    if (tagName !== null && elem.innerText != "") {
-        elem.innerText = tagName.replace("_", " ");
-    }
-}
-</script>

@@ -46,3 +46,7 @@ function reindex() {
         }
     )
 }
+
+registerOnSubmit("add-library", addLibrary)
+document.getElementById("reindex-btn")
+    ?.addEventListener("click", reindex);

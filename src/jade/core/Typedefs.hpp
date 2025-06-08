@@ -5,6 +5,7 @@
 #include "jade/server/ErrorHandler.hpp"
 #include "jade/server/SessionMiddleware.hpp"
 #include <crow.h>
+#include <crow/middlewares/cors.h>
 #include <crow/middlewares/cookie_parser.h>
 
 #include <jade/server/BaseMiddlewares.hpp>
@@ -13,6 +14,7 @@ namespace jade {
 
 using CrowServer = crow::Crow<
     // Global handlers {{{
+    crow::CORSHandler,
     CacheHelper,
     SecurityMetaHeaders,
     crow::CookieParser,

@@ -3,6 +3,27 @@ function showDialog(message) {
     alert(message);
 }
 
+function registerOnSubmit(id, func, maybeNull = false) {
+    let elem = null;
+    if (typeof id === "string") {
+        elem = document.getElementById(id);
+    } else {
+        elem = id;
+    }
+
+    if (elem === null) {
+        if (maybeNull) {
+            return;
+        }
+        throw Error("Failed to find form elem");
+    }
+
+    elem.addEventListener(
+        "submit",
+        func
+    )
+}
+
 function initModal(/** @type {String} */ id, /** @type {Boolean} */ reloadForm) {
     let elem = /** @type {HTMLDialogElement | null} */ (document.getElementById(id));
     if (elem == null) {

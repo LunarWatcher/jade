@@ -5,14 +5,13 @@
     data-current-page="{{CurrentPage}}"
     class="flex-vertical"
 >
-    <ul class="flex-horizontal" style="gap: 4px">
-        <li><a href="#" id="prev-page" onclick="navToPage(null, -1)" aria-label="Previous page">&laquo;</a></li>
-        <li><a href="#" id="next-page" onclick="navToPage(null, 1)" aria-label="Next page">&raquo;</a></li>
+    <ul class="flex-horizontal">
+        <li><a href="#" id="prev-page" aria-label="Previous page">&laquo;</a></li>
+        <li><a href="#" id="next-page" aria-label="Next page">&raquo;</a></li>
     </ul>
-    <form class="flex-horizontal" onsubmit="skipToPage(event)" id="skip-to-page">
+    <form class="flex-horizontal" id="skip-to-page">
         <input type="number" min="1" max="{{Count}}" name="page" required aria-label="Page number" />
         <input type="submit" value="Go" />
     </form>
 </nav>
-<script src="/static/js/paginator.js"></script>
 {{/Pages}}
