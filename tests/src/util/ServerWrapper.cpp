@@ -39,7 +39,6 @@ ServerWrapper::ServerWrapper(bool setupAdminUser) {
 
 ServerWrapper::~ServerWrapper() {
     spdlog::debug("Killing server");
-    std::this_thread::sleep_for(std::chrono::seconds(1));
     serv->kill();
     // serv->kill() invokes app.stop() or whatever, so because that's all this thread does, it should just terminate
     // after this.

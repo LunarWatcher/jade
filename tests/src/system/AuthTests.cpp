@@ -149,5 +149,5 @@ TEST_CASE("Verify that cookie injection doesn't work", "[Auth][Security]") {
         );
         REQUIRE(w.status_code == 200);
     }
-
 }
+
