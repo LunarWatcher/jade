@@ -26,7 +26,6 @@ public:
         std::chrono::seconds cycleTimeout
     );
     InterruptableThread(const InterruptableThread&) = delete;
-
     ~InterruptableThread();
 
     bool interrupt();

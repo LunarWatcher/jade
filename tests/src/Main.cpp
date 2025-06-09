@@ -1,6 +1,7 @@
 #include "Conf.hpp"
 #include "spdlog/spdlog.h"
 #include "stc/StringUtil.hpp"
+#include "util/ServerWrapper.hpp"
 #include <fstream>
 #include <spdlog/cfg/env.h>
 #include <stdexcept>
@@ -48,6 +49,9 @@ int main(int argc, const char* argv[]) {
     }
 
     spdlog::info(".env loaded successfully.");
+
+    jade::tests::ServerWrapper::writeConfigFile();
+    spdlog::info("Bootstrapped config");
 
     return Catch::Session().run(argc, argv);
 }

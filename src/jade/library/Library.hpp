@@ -67,17 +67,6 @@ private:
     void reindexLibrary(int64_t sourceId, const std::filesystem::path& dir);
     void scan();
     void generateThumbnail(int64_t id, const std::filesystem::path& file);
-
-    /**
-     * Utility class that uses the destructor to check if the runner thread abruptly dies.
-     */
-    struct ThreadCanary {
-        Library* host;
-
-        ~ThreadCanary() {
-            host->runnerDead = true;
-        }
-    };
 public:
     /**
      * Supported filetypes. 
@@ -148,6 +137,14 @@ public:
     );
 
     std::optional<Book> getBook(int64_t bookID);
+
+    void kill() {
+        if (runner) {
+            runner->kill();
+            delete runner;
+            runner = nullptr;
+        }
+    }
 
     bool isBookPageNumberValid(size_t page, size_t pagesize, std::optional<int64_t> libraryId = std::nullopt);
 

@@ -40,6 +40,7 @@ public:
     ~Server();
 
     void run();
+    void kill();
 
     const ServerConfig& getConfig() {
         return cfg;

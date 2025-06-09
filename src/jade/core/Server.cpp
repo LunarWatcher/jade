@@ -108,4 +108,9 @@ void Server::run() {
     app.run();
 }
 
+void Server::kill() {
+    lib->kill();
+    app.stop();
+}
+
 }

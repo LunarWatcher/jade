@@ -17,7 +17,7 @@ struct ServerConfig {
     /**
      * The port the webserver runs at. Should differ from :80/:443 if using nginx or similar
      */
-    short port = 6969;
+    uint16_t port = 6969;
 
     /**
      * The host the database is at. This must NOT include the port!

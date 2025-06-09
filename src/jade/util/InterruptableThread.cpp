@@ -16,6 +16,10 @@ InterruptableThread::InterruptableThread(
     });
 }
 
+InterruptableThread::~InterruptableThread() {
+    kill();
+}
+
 void InterruptableThread::run() {
     while (running) {
         std::unique_lock l(m);
@@ -42,10 +46,6 @@ bool InterruptableThread::interrupt() {
     control.notify_all();
     spdlog::info("InterruptableThread: Manual refresh requested");
     return true;
-}
-
-InterruptableThread::~InterruptableThread() {
-    kill();
 }
 
 }

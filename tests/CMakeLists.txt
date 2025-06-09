@@ -1,8 +1,12 @@
 add_executable(tests 
     src/Main.cpp
 
-    src/unit/InterruptableThread.cpp
-    src/unit/SearchParsing.cpp
+    src/unit/InterruptableThreadTests.cpp
+    src/unit/SearchParsingTests.cpp
+
+    src/system/AuthTests.cpp
+
+    src/util/ServerWrapper.cpp
 )
 
 FetchContent_Declare(

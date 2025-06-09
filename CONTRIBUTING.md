@@ -23,6 +23,7 @@ When creating a pull request, open it against the `master` branch. The `master` 
 * Naming conventions (C++):
     * Filenames, class names, struct names: PascalCase
     * Variable names, function names: camelCase
+        * **Note:** Functions used for crowcpp endpoints have another special naming convention, in the form of `<http method><function name>`. The whole method is still camelCase. As an example, consider a `login` endpoint, which accepts `POST` requests. The backing method is called `postLogin`. For endpoints supporting multiple HTTP methods, use your best judgement, as this has not yet happened, so no conventions have been established.
     * Namespaces: Lower-case only, except for inner namespaces that act similarly to what purely static classes would in other languages, which use PascalCase.
     * Constants: SCREAMING_SNAKE_CASE
 * Naming conventions (JavaScript):

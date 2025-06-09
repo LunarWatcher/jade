@@ -144,12 +144,13 @@ void AuthAPI::postSignup(Server *server, crow::request &req, crow::response &res
             "SELECT EXISTS(SELECT 1 FROM Jade.Users WHERE Username = $1)", 
             pqxx::params {data.username}
         );
-        auto hasExistingUser = tx.query1<long long>("SELECT COUNT(*) FROM Users");
+        auto hasAnyExistingUsers = tx.query1<long long>("SELECT COUNT(*) FROM Users");
         if (std::get<0>(exists)) {
             res = JSONResponse {
                 MessageResponse { "Username already taken" }
             };
             res.code = 400;
+            res.end();
             tx.abort();
             return;
         }
@@ -164,7 +165,7 @@ void AuthAPI::postSignup(Server *server, crow::request &req, crow::response &res
             password.salt,
             password.version,
             // Only the first user is auto-granted admin, every other user needs to be granted it manually.
-            std::get<0>(hasExistingUser) == 0
+            std::get<0>(hasAnyExistingUsers) == 0
         });
         tx.commit();
 
@@ -179,6 +180,7 @@ void AuthAPI::postSignup(Server *server, crow::request &req, crow::response &res
 void AuthAPI::getLogout(Server* server, crow::request& req, crow::response& res) {
     auto& userCtx = (*server)->get_context<MSessionMiddleware>(req);
 
+    // .kill() is a noop if there is no session. No need to do unnecessary work here
     userCtx.kill();
     auto redirect = req.url_params.get("redirect");
     if (redirect != nullptr && std::string_view(redirect) == "1") {

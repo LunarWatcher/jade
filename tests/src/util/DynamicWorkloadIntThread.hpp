@@ -29,7 +29,7 @@ struct DynamicWorkloadIntThread {
             [this]() {
                 std::unique_lock l(metaMutex);
                 mainSync.notify_all();
-                metaInterrupt.wait(l);
+                metaInterrupt.wait_for(l, std::chrono::seconds(3));
 
                 this->threadWorkload();
                 mainSync.notify_all();
