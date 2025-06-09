@@ -4,10 +4,10 @@
 
         <form id="login-form" class="flex-vertical grow">
             <label for="username">Username</label>
-            <input type="text" name="username" />
+            <input type="text" name="username" minlength="3" maxlength="64" />
 
             <label for="password">Password</label>
-            <input type="password" name="password" />
+            <input type="password" name="password" minlength="3" maxlength="256" />
 
             <input type="submit" id="submit" value="Log in" />
         </form>

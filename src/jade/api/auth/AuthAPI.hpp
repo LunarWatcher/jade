@@ -15,8 +15,9 @@ struct UserResponse {
 
 extern void init(Server* server);
 
-extern void login(Server* server, crow::request& req, crow::response& res);
-extern void signup(Server* server, crow::request& req, crow::response& res);
+extern void postLogin(Server* server, crow::request& req, crow::response& res);
+extern void postSignup(Server* server, crow::request& req, crow::response& res);
+extern void getLogout(Server* server, crow::request& req, crow::response& res);
 
 }
 

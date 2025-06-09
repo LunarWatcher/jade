@@ -2,18 +2,27 @@
     <div class="home-button">
         <a href="/">Jade</a>
     </div>
+    {{#User}}
+    <div class="dropdown-container flex-vertical flex-shrink">
+        <button id="dropdown-btn" class="flex-grow" title="Settings">⚙</button>
+    </div>
+    <dialog id="menu-dialog" class="style-secondary leftalign">
+        <button class="modal-close" title="Close">✕</button>
+        <div class="flex-vertical style-secondary">
+            <a href="/settings/user.html">Settings</a>
+            {{#IsAdmin}}
+            <a href="/settings/system.html">Admin settings</a>
+            {{/IsAdmin}}
+            <a href="/api/auth/logout?redirect=1">Log out</a>
+        </div>
+    </dialog>
+    {{/User}}
+    {{^User}}
     <nav>
         <ul>
-            {{#User}}
-                <li><a href="/settings/user.html">Settings</a></li>
-                {{#IsAdmin}}
-                <li><a href="/settings/system.html">Admin settings</a></li>
-                {{/IsAdmin}}
-            {{/User}}
-            {{^User}}
-                <li><a href="/auth/login.html">Log in</a></li>
-                <li><a href="/auth/signup.html">Sign up</a></li>
-            {{/User}}
+            <li><a href="/auth/login.html">Log in</a></li>
+            <li><a href="/auth/signup.html">Sign up</a></li>
         </ul>
     </nav>
+    {{/User}}
 </header>

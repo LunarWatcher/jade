@@ -37,11 +37,11 @@
 <div class="book-details p-nopad">
     <div class="header style-secondary flex-horizontal-rev">
         {{#User.IsAdmin}}
-        <a id="edit-book-btn" class="p8" href="#" aria-label="Edit book metadata">
+        <a id="edit-book-btn" class="p8" href="#" aria-label="Edit book metadata" title="Edit metadata">
             ✏️
         </a>
         {{/User.IsAdmin}}
-        <a class="p8" href="/api/books/{{Book.ID}}/download" target="_blank" download="true" aria-label="Download book">
+        <a class="p8" href="/api/books/{{Book.ID}}/download" target="_blank" download="true" aria-label="Download book" title="Download book">
             📥
         </a>
     </div>

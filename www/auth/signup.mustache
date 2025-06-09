@@ -4,10 +4,10 @@
 
         <form id="signup-form" class="flex-vertical grow" onsubmit="signup(event)">
             <label for="username">Username</label>
-            <input type="text" name="username" />
+            <input type="text" name="username" minlength="3" maxlength="64" />
 
-            <label for="password">Password</label>
-            <input type="password" name="password" />
+            <label for="password" >Password</label>
+            <input type="password" name="password" minlength="3" maxlength="256" />
 
             <input type="submit" id="submit" value="Sign up" />
         </form>

@@ -434,7 +434,9 @@ dialog {
 
 dialog::backdrop {
     background-color: black;
-    opacity: 0.4;
+
+
+    opacity: 0.8;
 }
 
 hr {
@@ -501,4 +503,30 @@ button.danger:hover {
 #edit-dialog textarea {
     resize: vertical;
     min-height: 5rem;
+}
+
+dialog.leftalign {
+    margin: 0;
+    margin-left: auto;
+    max-height: unset;
+    height: 100vh;
+}
+
+dialog.leftalign > div {
+    height: 100%;
+}
+
+
+.modal-close {
+    background-color: unset;
+    font-size: 1rem;
+}
+.modal-close:hover {
+    background-color: color-mix(in srgb, var(--regular-text-colour), transparent 84%) !important;
+    
+    box-shadow: var(--standard-shadow) !important;
+}
+
+#dropdown-btn {
+    font-size: 1.25rem;
 }

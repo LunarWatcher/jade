@@ -3,7 +3,6 @@
 #include <crow.h>
 
 #include "crow/common.h"
-#include "crow/middlewares/session.h"
 #include "jade/api/auth/AuthAPI.hpp"
 #include "jade/core/Macros.hpp"
 #include "jade/core/Server.hpp"
@@ -20,11 +19,15 @@ namespace jade {
 void AuthAPI::init(Server *server) {
     CROW_ROUTE(server->app, "/api/auth/login")
         .methods(crow::HTTPMethod::POST)
-        (JADE_CALLBACK_BINDING(AuthAPI::login));
-
+        (JADE_CALLBACK_BINDING(AuthAPI::postLogin));
     CROW_ROUTE(server->app, "/api/auth/signup")
         .methods(crow::HTTPMethod::POST)
-        (JADE_CALLBACK_BINDING(AuthAPI::signup));
+        (JADE_CALLBACK_BINDING(AuthAPI::postSignup));
+
+    CROW_ROUTE(server->app, "/api/auth/logout")
+        .methods(crow::HTTPMethod::GET)
+        (JADE_CALLBACK_BINDING(AuthAPI::getLogout));
+
 
     // Pseudo-catchall, leaving this for future reference since blueprints have been broken for around 1.5 years, and
     // I'm probably not gonna shoehorn them in after the fact:
@@ -37,7 +40,7 @@ void AuthAPI::init(Server *server) {
         //});
 }
 
-void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
+void AuthAPI::postLogin(Server *server, crow::request &req, crow::response &res) {
     auto& userCtx = (*server)->get_context<MSessionMiddleware>(req);
 
     if (userCtx.data && userCtx.data->user) {
@@ -103,7 +106,7 @@ void AuthAPI::login(Server *server, crow::request &req, crow::response &res) {
     res.end();
 }
 
-void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
+void AuthAPI::postSignup(Server *server, crow::request &req, crow::response &res) {
     auto& userCtx = (*server)->get_context<MSessionMiddleware>(req);
 
     if (userCtx.data && userCtx.data->user) {
@@ -170,6 +173,19 @@ void AuthAPI::signup(Server *server, crow::request &req, crow::response &res) {
         };
     });
 
+    res.end();
+}
+
+void AuthAPI::getLogout(Server* server, crow::request& req, crow::response& res) {
+    auto& userCtx = (*server)->get_context<MSessionMiddleware>(req);
+
+    userCtx.kill();
+    auto redirect = req.url_params.get("redirect");
+    if (redirect != nullptr && std::string_view(redirect) == "1") {
+        res.redirect("/auth/login.html");
+    } else {
+        res = JSONResponse { MessageResponse { "OK" }};
+    }
     res.end();
 }
 

@@ -92,3 +92,28 @@ function callAPI(endpoint, method, body, statusHandlers) {
             console.error(err);
         })
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    document.getElementById("dropdown-btn")
+        ?.addEventListener("click", ev => {
+            ev.preventDefault();
+            document.getElementById("menu-dialog").showModal();
+        });
+    document.getElementById("menu-dialog")
+        ?.addEventListener("click", ev => {
+            ev.target.close();
+        });
+    document.querySelector("#menu-dialog > div")
+        ?.addEventListener("click", ev => {
+            ev.stopPropagation();
+        });
+
+    for (let btn of document.getElementsByClassName("modal-close")) {
+        btn.addEventListener("click", ev => {
+            ev.stopPropagation();
+            ev.target.parentElement.close();
+        });
+    }
+        
+});
