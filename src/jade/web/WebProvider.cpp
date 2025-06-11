@@ -59,6 +59,27 @@ void WebProvider::init(Server* server) {
         .methods(crow::HTTPMethod::GET)
         ([](crow::response& res) { res.redirect_perm("/"); });
     // }}}
+    
+    // Does not work due to https://github.com/CrowCpp/Crow/issues/859
+    //CROW_CATCHALL_ROUTE(server->app)
+        //([server](const crow::request& req, crow::response& res) {
+
+            //static ContextProvider::PageContext ctx {
+                //.pageTitle = "Error",
+                //.pageDescription = "An error happened",
+                //.pageFile = "error.mustache"
+            //};
+
+            //auto context = ContextProvider::buildBaseContext(
+                //ContextProvider::ContextScope::USER, req, ctx, server
+            //);
+            //context["ErrorCode"] = res.code;
+            //context["ErrorMessage"] = "404: page not found!";
+
+            //res.set_header("Content-Type", ContentType::html);
+            //res.body = ContextProvider::getBaseTemplate()
+                //.render_string(context);
+        //});
 
 }
 

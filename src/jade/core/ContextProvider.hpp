@@ -77,7 +77,7 @@ struct PageContext {
  */
 extern crow::mustache::context buildBaseContext(
     int contextScope,
-    crow::request& req,
+    const crow::request& req,
     PageContext& baseCtx,
     Server* serv
 );
@@ -103,7 +103,7 @@ namespace _detail {
 
 extern void buildUserContext(
     crow::mustache::context& ctx,
-    crow::request& req,
+    const crow::request& req,
     Server* serv
 );
 
